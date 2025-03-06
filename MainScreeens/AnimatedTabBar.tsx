@@ -24,9 +24,9 @@ interface TabIconProps {
 // Dark Theme Colors
 const COLORS = {
 	deepBlue: "#0B1033",
-	softPurple: "#4B0082",
+	softPurple: "#302253",
 	neonBlue: "#00B4FF",
-	neonPurple: "#B026FF",
+	neonPurple: "#302253",
 	neonGreen: "#39FF14",
 	textPrimary: "#FFFFFF",
 	textSecondary: "#CCCCCC",
@@ -155,7 +155,7 @@ const AnimatedTabBar = ({
 				]}
 			>
 				<LinearGradient
-					colors={["rgba(11, 16, 51, 0.95)", "rgba(75, 0, 130, 0.95)"]}
+					colors={["rgba(11, 16, 51, 0.95)", "rgba(33, 33, 100, 0.95)"]}
 					style={styles.gradient}
 					start={{ x: 0, y: 0 }}
 					end={{ x: 1, y: 0 }}

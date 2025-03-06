@@ -17,33 +17,31 @@ import AnimatedTabBar from "./MainScreeens/AnimatedTabBar";
 import ResourceDetailScreen from "./MainScreeens/ResourceDetailScreen";
 import ResourcesScreen from "./MainScreeens/ResourcesScreen";
 import ProfileScreen from "./MainScreeens/ProfileScreen";
+import { ThemeProvider, useTheme } from "./MainScreeens/constants/ThemeContext";
 
 // Create navigators
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 
-const COLORS = {
-	deepBlue: "#0B1033",
-	softPurple: "#4B0082",
-	neonBlue: "#00B4FF",
-	neonPurple: "#B026FF",
-	textPrimary: "#FFFFFF",
-	textSecondary: "#CCCCCC",
-};
-
 // Placeholder screens with common gradient background
 const CommonScreen = ({ title, subtitle = "Coming soon..." }) => {
+	const { colors } = useTheme();
+
 	return (
 		<LinearGradient
-			colors={[COLORS.deepBlue, COLORS.softPurple]}
+			colors={[colors.deepBlue, colors.softPurple]}
 			style={styles.container}
 			start={{ x: 0, y: 0 }}
 			end={{ x: 1, y: 1 }}
 		>
 			<View style={styles.center}>
-				<Text style={styles.title}>{title}</Text>
-				<Text style={styles.subtitle}>{subtitle}</Text>
+				<Text style={[styles.title, { color: colors.textPrimary }]}>
+					{title}
+				</Text>
+				<Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+					{subtitle}
+				</Text>
 			</View>
 		</LinearGradient>
 	);
@@ -58,9 +56,6 @@ import TypeEngScreen from "./MainScreeens/learning/TypeEngScreen";
 import PromptEngScreen from "./MainScreeens/learning/PromptEngScreen";
 
 import ClassesScreen from "./MainScreeens/ClassesScreen";
-
-// Removed the duplicate ResourcesScreen function
-// Now using the imported ResourcesScreen component
 
 function PremiumScreen() {
 	return <CommonScreen title="Premium" />;
@@ -91,15 +86,17 @@ function TabNavigator() {
 
 // Main drawer navigator
 function DrawerNavigator() {
+	const { colors } = useTheme();
+
 	return (
 		<Drawer.Navigator
 			drawerContent={(props) => <CustomDrawerContent {...props} />}
 			screenOptions={{
 				headerShown: false,
-				drawerActiveTintColor: COLORS.neonBlue,
-				drawerInactiveTintColor: COLORS.textSecondary,
+				drawerActiveTintColor: colors.neonBlue,
+				drawerInactiveTintColor: colors.textSecondary,
 				drawerStyle: {
-					backgroundColor: COLORS.deepBlue,
+					backgroundColor: colors.deepBlue,
 					width: 280,
 				},
 			}}
@@ -172,7 +169,17 @@ function RootStack() {
 	);
 }
 
+// Main App component wrapped with ThemeProvider
 export default function App() {
+	return (
+		<ThemeProvider>
+			<AppContent />
+		</ThemeProvider>
+	);
+}
+
+// Separate component to use theme context
+function AppContent() {
 	return (
 		<SafeAreaProvider style={styles.container}>
 			<Toaster />
@@ -196,11 +203,9 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 24,
 		fontWeight: "bold",
-		color: COLORS.textPrimary,
 		marginBottom: 10,
 	},
 	subtitle: {
 		fontSize: 16,
-		color: COLORS.textSecondary,
 	},
 });

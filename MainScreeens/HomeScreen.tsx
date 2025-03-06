@@ -20,8 +20,9 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigation, DrawerActions } from "@react-navigation/native";
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
-import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
+import Animated, { FadeInDown } from "react-native-reanimated";
 import { COLORS } from "./constants/Colors";
+import LearningActivitiesCarousel from "./constants/LearningActivitiesCarousel";
 
 const { width } = Dimensions.get("window");
 
@@ -114,15 +115,6 @@ export default function HomeScreen() {
 		navigation.dispatch(DrawerActions.openDrawer());
 	};
 
-	const learningOptions = [
-		{ icon: "headset", title: "ListenEng", color: "#00B4FF" },
-		{ icon: "microphone", title: "SpeakEng", color: "#B026FF" },
-		{ icon: "book-open", title: "ReadEng", color: "#39FF14" },
-		{ icon: "pencil-alt", title: "WriteEng", color: "#FF6B35" },
-		{ icon: "comment", title: "PromptEng", color: "#FF00FF" },
-		{ icon: "keyboard", title: "TypeEng", color: "#FFD700" },
-	];
-
 	return (
 		<LinearGradient
 			colors={[COLORS.deepBlue, COLORS.softPurple]}
@@ -146,13 +138,13 @@ export default function HomeScreen() {
 						/>
 					</TouchableOpacity>
 					<View style={styles.headerCenter}>
-  <Text style={styles.appTitle}>LearnEng</Text>
-</View>
-{/* Remove the " " (space character) that was here */}
-<TouchableOpacity
-  style={styles.profileButton}
-  onPress={() => navigation.navigate("Profile")}
->	<Image
+						<Text style={styles.appTitle}>LearnEng</Text>
+					</View>
+					<TouchableOpacity
+						style={styles.profileButton}
+						onPress={() => navigation.navigate("Profile")}
+					>
+						<Image
 							source={{
 								uri: "https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20female%20student%20with%20a%20friendly%20smile&aspect=1:1&seed=123",
 							}}
@@ -208,34 +200,8 @@ export default function HomeScreen() {
 					<Animated.View entering={FadeInDown.delay(300).duration(600)}>
 						<Text style={styles.sectionTitle}>Learning Activities</Text>
 
-						<View style={styles.gridContainer}>
-							{learningOptions.map((item, index) => (
-								<Animated.View
-									key={index}
-									entering={FadeInRight.delay(400 + index * 100).duration(600)}
-								>
-									<TouchableOpacity style={styles.gridItem}>
-										<View
-											style={[
-												styles.activityIconContainer,
-												{ backgroundColor: `${item.color}20` },
-											]}
-										>
-											<FontAwesome5
-												name={item.icon}
-												size={24}
-												color={item.color}
-												style={[
-													styles.glowIcon,
-													{ textShadowColor: item.color },
-												]}
-											/>
-										</View>
-										<Text style={styles.gridItemText}>{item.title}</Text>
-									</TouchableOpacity>
-								</Animated.View>
-							))}
-						</View>
+						{/* Replace the grid view with the new carousel component */}
+						<LearningActivitiesCarousel />
 					</Animated.View>
 
 					<Animated.View entering={FadeInDown.delay(400).duration(600)}>
@@ -338,7 +304,7 @@ export default function HomeScreen() {
 
 					{/* Extra space at bottom for navigation bar */}
 					<View style={{ height: 100 }} />
-</ScrollView>
+				</ScrollView>
 				{/* Navigation bar has been moved to AnimatedTabBar component */}
 			</SafeAreaView>
 		</LinearGradient>
@@ -496,37 +462,6 @@ const styles = StyleSheet.create({
 		marginTop: 25,
 		marginBottom: 15,
 	},
-	gridContainer: {
-		flexDirection: "row",
-		flexWrap: "wrap",
-		justifyContent: "space-between",
-		marginHorizontal: -5,
-	},
-	gridItem: {
-		width: (width - 60) / 2,
-		backgroundColor: COLORS.cardBg,
-		borderWidth: 1,
-		borderColor: COLORS.cardBorder,
-		borderRadius: 16,
-		padding: 16,
-		marginHorizontal: 5,
-		marginBottom: 10,
-		alignItems: "center",
-	},
-	gridItemText: {
-		color: COLORS.textPrimary,
-		marginTop: 10,
-		fontSize: 14,
-		fontWeight: "500",
-	},
-	activityIconContainer: {
-		width: 60,
-		height: 60,
-		borderRadius: 30,
-		justifyContent: "center",
-		alignItems: "center",
-		marginBottom: 10,
-	},
 	chartCard: {
 		backgroundColor: COLORS.cardBg,
 		borderRadius: 16,
@@ -575,7 +510,7 @@ const styles = StyleSheet.create({
 		color: COLORS.textSecondary,
 		fontSize: 12,
 		marginLeft: 5,
-	}, // Navigation bar styles have been moved to AnimatedTabBar component
+	},
 	glowIcon: {
 		textShadowColor: COLORS.neonBlue,
 		textShadowOffset: { width: 0, height: 0 },

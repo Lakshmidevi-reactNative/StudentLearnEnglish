@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
 	View,
 	Text,
@@ -14,28 +14,20 @@ import {
 } from "@react-navigation/drawer";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-
-const COLORS = {
-	deepBlue: "#0B1033",
-	softPurple: "#4B0082",
-	neonBlue: "#00B4FF",
-	neonPurple: "#B026FF",
-	textPrimary: "#FFFFFF",
-	textSecondary: "#CCCCCC",
-	cardBg: "rgba(255, 255, 255, 0.06)",
-	cardBorder: "rgba(255, 255, 255, 0.1)",
-};
+import { useTheme } from "./constants/ThemeContext";
 
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
 
 export default function CustomDrawerContent(
 	props: DrawerContentComponentProps
 ) {
-	const [isDarkMode, setIsDarkMode] = useState(true);
+	// Use our theme context
+	const { theme, colors, toggleTheme } = useTheme();
+	const isDarkMode = theme === "dark";
 
 	return (
 		<LinearGradient
-			colors={[COLORS.deepBlue, COLORS.softPurple]}
+			colors={[colors.deepBlue, colors.softPurple]}
 			style={styles.container}
 			start={{ x: 0, y: 0 }}
 			end={{ x: 1, y: 1 }}
@@ -49,44 +41,92 @@ export default function CustomDrawerContent(
 						source={{
 							uri: "https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20female%20student%20with%20a%20friendly%20smile&aspect=1:1&seed=123",
 						}}
-						style={styles.profileImage}
+						style={[styles.profileImage, { borderColor: colors.neonPurple }]}
 					/>
-					<Text style={styles.profileName}>Sarah Johnson</Text>
-					<View style={styles.levelBadge}>
-						<Text style={styles.levelText}>Beginner</Text>
+					<Text style={[styles.profileName, { color: colors.textPrimary }]}>
+						Sarah Johnson
+					</Text>
+					<View
+						style={[
+							styles.levelBadge,
+							{
+								backgroundColor: "rgba(0, 180, 255, 0.2)",
+								borderColor: "rgba(0, 180, 255, 0.5)",
+							},
+						]}
+					>
+						<Text style={[styles.levelText, { color: colors.neonBlue }]}>
+							Beginner
+						</Text>
 					</View>
 				</View>
 
-				<View style={styles.statsContainer}>
+				<View
+					style={[
+						styles.statsContainer,
+						{
+							backgroundColor: colors.cardBg,
+							borderColor: colors.cardBorder,
+						},
+					]}
+				>
 					<View style={styles.statItem}>
-						<Text style={styles.statNumber}>24</Text>
-						<Text style={styles.statLabel}>Days</Text>
+						<Text style={[styles.statNumber, { color: colors.neonPurple }]}>
+							24
+						</Text>
+						<Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+							Days
+						</Text>
 					</View>
-					<View style={styles.divider} />
+					<View
+						style={[styles.divider, { backgroundColor: colors.cardBorder }]}
+					/>
 					<View style={styles.statItem}>
-						<Text style={styles.statNumber}>385</Text>
-						<Text style={styles.statLabel}>Points</Text>
+						<Text style={[styles.statNumber, { color: colors.neonPurple }]}>
+							385
+						</Text>
+						<Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+							Points
+						</Text>
 					</View>
-					<View style={styles.divider} />
+					<View
+						style={[styles.divider, { backgroundColor: colors.cardBorder }]}
+					/>
 					<View style={styles.statItem}>
-						<Text style={styles.statNumber}>8</Text>
-						<Text style={styles.statLabel}>Skills</Text>
+						<Text style={[styles.statNumber, { color: colors.neonPurple }]}>
+							8
+						</Text>
+						<Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+							Skills
+						</Text>
 					</View>
 				</View>
 
-				<View style={styles.dividerHorizontal} />
+				<View
+					style={[
+						styles.dividerHorizontal,
+						{ backgroundColor: colors.cardBorder },
+					]}
+				/>
 
 				<DrawerItemList {...props} />
 
-				<View style={styles.dividerHorizontal} />
+				<View
+					style={[
+						styles.dividerHorizontal,
+						{ backgroundColor: colors.cardBorder },
+					]}
+				/>
 
 				<View style={styles.modeToggleContainer}>
-					<Text style={styles.modeToggleLabel}>Dark Mode</Text>
+					<Text style={[styles.modeToggleLabel, { color: colors.textPrimary }]}>
+						{isDarkMode ? "Dark Mode" : "Light Mode"}
+					</Text>
 					<Switch
 						value={isDarkMode}
-						onValueChange={setIsDarkMode}
-						trackColor={{ false: "#767577", true: COLORS.neonBlue }}
-						thumbColor={isDarkMode ? COLORS.neonPurple : "#f4f3f4"}
+						onValueChange={toggleTheme}
+						trackColor={{ false: "#767577", true: colors.neonBlue }}
+						thumbColor={isDarkMode ? colors.neonPurple : "#f4f3f4"}
 						ios_backgroundColor="#3e3e3e"
 					/>
 				</View>
@@ -95,14 +135,20 @@ export default function CustomDrawerContent(
 					<MaterialCommunityIcons
 						name="logout"
 						size={20}
-						color={COLORS.textSecondary}
+						color={colors.textSecondary}
 					/>
-					<Text style={styles.logoutText}>Sign Out</Text>
+					<Text style={[styles.logoutText, { color: colors.textSecondary }]}>
+						Sign Out
+					</Text>
 				</TouchableOpacity>
 			</DrawerContentScrollView>
 
-			<View style={styles.versionContainer}>
-				<Text style={styles.versionText}>LearnEng v1.0.0</Text>
+			<View
+				style={[styles.versionContainer, { borderTopColor: colors.cardBorder }]}
+			>
+				<Text style={[styles.versionText, { color: colors.textSecondary }]}>
+					LearnEng v1.0.0
+				</Text>
 			</View>
 		</LinearGradient>
 	);
@@ -125,24 +171,19 @@ const styles = StyleSheet.create({
 		borderRadius: 50,
 		marginBottom: 10,
 		borderWidth: 2,
-		borderColor: COLORS.neonPurple,
 	},
 	profileName: {
-		color: COLORS.textPrimary,
 		fontSize: 18,
 		fontWeight: "700",
 		marginBottom: 5,
 	},
 	levelBadge: {
-		backgroundColor: "rgba(0, 180, 255, 0.2)",
 		paddingHorizontal: 15,
 		paddingVertical: 5,
 		borderRadius: 20,
 		borderWidth: 1,
-		borderColor: "rgba(0, 180, 255, 0.5)",
 	},
 	levelText: {
-		color: COLORS.neonBlue,
 		fontWeight: "600",
 		fontSize: 12,
 	},
@@ -151,10 +192,8 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 		marginHorizontal: 20,
 		marginVertical: 10,
-		backgroundColor: COLORS.cardBg,
 		borderRadius: 12,
 		borderWidth: 1,
-		borderColor: COLORS.cardBorder,
 		padding: 15,
 	},
 	statItem: {
@@ -162,21 +201,17 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	statNumber: {
-		color: COLORS.neonPurple,
 		fontSize: 20,
 		fontWeight: "700",
 	},
 	statLabel: {
-		color: COLORS.textSecondary,
 		fontSize: 12,
 	},
 	divider: {
 		width: 1,
-		backgroundColor: COLORS.cardBorder,
 	},
 	dividerHorizontal: {
 		height: 1,
-		backgroundColor: COLORS.cardBorder,
 		marginVertical: 15,
 		marginHorizontal: 20,
 	},
@@ -188,7 +223,6 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 	},
 	modeToggleLabel: {
-		color: COLORS.textPrimary,
 		fontSize: 16,
 	},
 	logoutButton: {
@@ -199,17 +233,14 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 	},
 	logoutText: {
-		color: COLORS.textSecondary,
 		marginLeft: 10,
 		fontSize: 16,
 	},
 	versionContainer: {
 		padding: 20,
 		borderTopWidth: 1,
-		borderTopColor: COLORS.cardBorder,
 	},
 	versionText: {
-		color: COLORS.textSecondary,
 		fontSize: 12,
 		textAlign: "center",
 	},

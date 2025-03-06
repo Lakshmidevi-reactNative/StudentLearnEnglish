@@ -11,7 +11,11 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialCommunityIcons, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import {
+	MaterialCommunityIcons,
+	FontAwesome5,
+	Ionicons,
+} from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import * as DocumentPicker from "expo-document-picker";
@@ -19,7 +23,7 @@ import * as DocumentPicker from "expo-document-picker";
 // Theme colors
 const COLORS = {
 	deepBlue: "#0B1033",
-	softPurple: "#4B0082",
+	softPurple: "#302253",
 	neonBlue: "#00B4FF",
 	neonPurple: "#B026FF",
 	neonGreen: "#39FF14",
@@ -52,7 +56,8 @@ export default function ContentListTemplate() {
 			type: "PDF",
 			date: "2025-03-01",
 			size: "4.2 MB",
-			thumbnail: "https://api.a0.dev/assets/image?text=English%20Grammar&aspect=1:1&seed=123",
+			thumbnail:
+				"https://api.a0.dev/assets/image?text=English%20Grammar&aspect=1:1&seed=123",
 		},
 		{
 			id: "2",
@@ -61,7 +66,8 @@ export default function ContentListTemplate() {
 			type: "DOCX",
 			date: "2025-02-28",
 			size: "1.7 MB",
-			thumbnail: "https://api.a0.dev/assets/image?text=Vocabulary&aspect=1:1&seed=456",
+			thumbnail:
+				"https://api.a0.dev/assets/image?text=Vocabulary&aspect=1:1&seed=456",
 		},
 		{
 			id: "3",
@@ -70,7 +76,8 @@ export default function ContentListTemplate() {
 			type: "MP3",
 			date: "2025-02-25",
 			size: "12.5 MB",
-			thumbnail: "https://api.a0.dev/assets/image?text=Conversation&aspect=1:1&seed=789",
+			thumbnail:
+				"https://api.a0.dev/assets/image?text=Conversation&aspect=1:1&seed=789",
 		},
 	]);
 
@@ -92,7 +99,7 @@ export default function ContentListTemplate() {
 			// Process the first selected file
 			const file = result.assets[0];
 			const fileType = file.mimeType?.split("/")[1]?.toUpperCase() || "FILE";
-			
+
 			// Create a new content item
 			const newContent: ContentItem = {
 				id: (contents.length + 1).toString(),
@@ -101,7 +108,9 @@ export default function ContentListTemplate() {
 				type: fileType,
 				date: new Date().toISOString().split("T")[0],
 				size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-				thumbnail: `https://api.a0.dev/assets/image?text=${fileType}&aspect=1:1&seed=${Math.floor(Math.random() * 1000)}`,
+				thumbnail: `https://api.a0.dev/assets/image?text=${fileType}&aspect=1:1&seed=${Math.floor(
+					Math.random() * 1000
+				)}`,
 			};
 
 			// Update the contents state
@@ -116,27 +125,52 @@ export default function ContentListTemplate() {
 			<TouchableOpacity style={styles.contentCard}>
 				<View style={styles.contentImageContainer}>
 					{item.thumbnail ? (
-						<Image source={{ uri: item.thumbnail }} style={styles.contentThumbnail} />
+						<Image
+							source={{ uri: item.thumbnail }}
+							style={styles.contentThumbnail}
+						/>
 					) : (
-						<View style={[styles.contentThumbnailPlaceholder, { backgroundColor: `${COLORS.neonBlue}20` }]}>
+						<View
+							style={[
+								styles.contentThumbnailPlaceholder,
+								{ backgroundColor: `${COLORS.neonBlue}20` },
+							]}
+						>
 							<Text style={styles.contentTypeBadge}>{item.type}</Text>
 						</View>
 					)}
 				</View>
 				<View style={styles.contentDetails}>
 					<Text style={styles.contentTitle}>{item.title}</Text>
-					<Text style={styles.contentDescription} numberOfLines={1}>{item.description}</Text>
+					<Text style={styles.contentDescription} numberOfLines={1}>
+						{item.description}
+					</Text>
 					<View style={styles.contentMeta}>
 						<View style={styles.contentMetaItem}>
-							<MaterialCommunityIcons name="calendar" size={14} color={COLORS.textSecondary} />
+							<MaterialCommunityIcons
+								name="calendar"
+								size={14}
+								color={COLORS.textSecondary}
+							/>
 							<Text style={styles.contentMetaText}>{item.date}</Text>
 						</View>
 						<View style={styles.contentMetaItem}>
-							<MaterialCommunityIcons name="file-outline" size={14} color={COLORS.textSecondary} />
+							<MaterialCommunityIcons
+								name="file-outline"
+								size={14}
+								color={COLORS.textSecondary}
+							/>
 							<Text style={styles.contentMetaText}>{item.size}</Text>
 						</View>
-						<View style={[styles.typeBadge, { backgroundColor: `${COLORS.neonBlue}20` }]}>
-							<Text style={[styles.typeText, { color: COLORS.neonBlue }]}>{item.type}</Text>
+						<View
+							style={[
+								styles.typeBadge,
+								{ backgroundColor: `${COLORS.neonBlue}20` },
+							]}
+						>
+							<Text style={[styles.typeText, { color: COLORS.neonBlue }]}>
+								{item.type}
+							</Text>
 						</View>
 					</View>
 				</View>
@@ -167,8 +201,15 @@ export default function ContentListTemplate() {
 				<View style={styles.mainContainer}>
 					<View style={styles.uploadSection}>
 						<Text style={styles.sectionTitle}>My Content</Text>
-						<TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
-							<Ionicons name="cloud-upload-outline" size={20} color={COLORS.textPrimary} />
+						<TouchableOpacity
+							style={styles.uploadButton}
+							onPress={handleUpload}
+						>
+							<Ionicons
+								name="cloud-upload-outline"
+								size={20}
+								color={COLORS.textPrimary}
+							/>
 							<Text style={styles.uploadButtonText}>Upload</Text>
 						</TouchableOpacity>
 					</View>
@@ -190,7 +231,7 @@ export default function ContentListTemplate() {
 						<FlatList
 							data={contents}
 							renderItem={renderContentItem}
-							keyExtractor={item => item.id}
+							keyExtractor={(item) => item.id}
 							showsVerticalScrollIndicator={false}
 							contentContainerStyle={styles.contentsList}
 						/>
