@@ -1,0 +1,53 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log
+.pnpm-debug.log*
+.env
+.env.*.local
+
+# TypeScript build files
+dist/
+*.tsbuildinfo
+
+# React Native / Expo
+.expo/
+.expo-shared/
+*.log
+*.lock
+metro.config.js
+babel.config.js
+packager-info.json
+index.android.bundle
+index.ios.bundle
+debug.keystore
+android/app/debug.keystore
+
+# Jest / Testing
+coverage/
+jest/
+.vscode/
+
+# Android build files
+android/.gradle/
+android/.idea/
+android/app/build/
+android/build/
+android/captures/
+android/keystore/
+*.iml
+*.hprof
+*.log
+
+# iOS build files (if applicable)
+ios/Pods/
+ios/build/
+ios/.DS_Store
+ios/.idea/
+
+# MacOS / OS-specific files
+.DS_Store
+*.swp
+*.swo
+*.swn
+Thumbs.db
