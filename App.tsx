@@ -17,7 +17,7 @@ import AnimatedTabBar from "./MainScreeens/AnimatedTabBar";
 import ResourceDetailScreen from "./MainScreeens/ResourceDetailScreen";
 import ResourcesScreen from "./MainScreeens/ResourcesScreen";
 import ProfileScreen from "./MainScreeens/ProfileScreen";
-import { ThemeProvider, useTheme } from "./MainScreeens/constants/ThemeContext";
+import { useTheme } from "./MainScreeens/constants/ThemeContext";
 
 // Create navigators
 const Stack = createNativeStackNavigator();
@@ -56,19 +56,15 @@ import TypeEngScreen from "./MainScreeens/learning/TypeEngScreen";
 import PromptEngScreen from "./MainScreeens/learning/PromptEngScreen";
 
 import ClassesScreen from "./MainScreeens/ClassesScreen";
+import { COLORS } from "./MainScreeens/constants/Colors";
 
-function PremiumScreen() {
-	return <CommonScreen title="Premium" />;
-}
-
+import PremiumScreen from "./MainScreeens/PremiumScreen";
 // Bottom tab navigator
 function TabNavigator() {
 	return (
 		<Tab.Navigator
 			tabBar={(props) => <AnimatedTabBar {...props} />}
-			screenOptions={{
-				headerShown: false,
-			}}
+			screenOptions={{ headerShown: false }}
 		>
 			<Tab.Screen name="Home" component={HomeScreen} />
 			<Tab.Screen name="Learn" component={LearnScreen} />
@@ -76,9 +72,7 @@ function TabNavigator() {
 			<Tab.Screen
 				name="Resources"
 				component={ResourcesScreen}
-				options={{
-					unmountOnBlur: true, // This helps prevent state issues
-				}}
+				options={{ unmountOnBlur: true }}
 			/>
 		</Tab.Navigator>
 	);
@@ -86,17 +80,15 @@ function TabNavigator() {
 
 // Main drawer navigator
 function DrawerNavigator() {
-	const { colors } = useTheme();
-
 	return (
 		<Drawer.Navigator
 			drawerContent={(props) => <CustomDrawerContent {...props} />}
 			screenOptions={{
 				headerShown: false,
-				drawerActiveTintColor: colors.neonBlue,
-				drawerInactiveTintColor: colors.textSecondary,
+				drawerActiveTintColor: COLORS.neonBlue,
+				drawerInactiveTintColor: COLORS.textSecondary,
 				drawerStyle: {
-					backgroundColor: colors.deepBlue,
+					backgroundColor: COLORS.deepBlue,
 					width: 280,
 				},
 			}}
@@ -151,11 +143,7 @@ function DrawerNavigator() {
 
 function RootStack() {
 	return (
-		<Stack.Navigator
-			screenOptions={{
-				headerShown: false,
-			}}
-		>
+		<Stack.Navigator screenOptions={{ headerShown: false }}>
 			<Stack.Screen name="Main" component={DrawerNavigator} />
 			<Stack.Screen name="ListenEng" component={ListenEngScreen} />
 			<Stack.Screen name="SpeakEng" component={SpeakEngScreen} />
@@ -169,17 +157,7 @@ function RootStack() {
 	);
 }
 
-// Main App component wrapped with ThemeProvider
 export default function App() {
-	return (
-		<ThemeProvider>
-			<AppContent />
-		</ThemeProvider>
-	);
-}
-
-// Separate component to use theme context
-function AppContent() {
 	return (
 		<SafeAreaProvider style={styles.container}>
 			<Toaster />
@@ -203,9 +181,11 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 24,
 		fontWeight: "bold",
+		color: COLORS.textPrimary,
 		marginBottom: 10,
 	},
 	subtitle: {
 		fontSize: 16,
+		color: COLORS.textSecondary,
 	},
 });

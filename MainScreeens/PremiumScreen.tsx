@@ -9,6 +9,7 @@ import {
 	Platform,
 	Switch,
 	ActivityIndicator,
+	Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,11 +17,14 @@ import {
 	MaterialCommunityIcons,
 	FontAwesome5,
 	Ionicons,
+	MaterialIcons,
 } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import { COLORS } from "./constants/Colors";
 import { toast } from "sonner-native";
+
+const { width } = Dimensions.get("window");
 
 export default function PremiumScreen() {
 	const navigation = useNavigation();
@@ -34,46 +38,62 @@ export default function PremiumScreen() {
 	// Plan pricing
 	const pricing = {
 		foundation: {
-			monthly: 9.99,
-			yearly: 99.99,
+			monthly: 199,
+			yearly: 199,
 			yearlySavings: 20,
 		},
 		fluence: {
-			monthly: 19.99,
-			yearly: 199.99,
+			monthly: 299,
+			yearly: 2999,
 			yearlySavings: 20,
 		},
 	};
 
-	// Plan features
-	const features = {
-		foundation: [
-			{
-				title: "Listen, Speak, Read, Write, Type, Prompt in English",
-				included: true,
-			},
-			{ title: "Basic Practice Tests", included: true },
-			{ title: "Class Tests Access", included: true },
-			{ title: "Standard Progress Tracking", included: true },
-			{ title: "Advanced Practice Tests", included: false },
-			{ title: "Pronunciation Analysis", included: false },
-			{ title: "AI-Powered Feedback", included: false },
-			{ title: "Personalized Learning Path", included: false },
-		],
-		fluence: [
-			{
-				title: "Listen, Speak, Read, Write, Type, Prompt in English",
-				included: true,
-			},
-			{ title: "Basic Practice Tests", included: true },
-			{ title: "Class Tests Access", included: true },
-			{ title: "Standard Progress Tracking", included: true },
-			{ title: "Advanced Practice Tests", included: true },
-			{ title: "Pronunciation Analysis", included: true },
-			{ title: "AI-Powered Feedback", included: true },
-			{ title: "Personalized Learning Path", included: true },
-		],
-	};
+	// Plan data
+	const plans = [
+		{
+			id: "foundation",
+			name: "Foundation",
+			description:
+				"Perfect for casual learners who want to build basic English skills",
+			color: COLORS.neonBlue,
+			icon: "book-education",
+			features: [
+				{
+					title: "Listen, Speak, Read, Write, Type, Prompt in English",
+					included: true,
+				},
+				{ title: "Basic Practice Tests", included: true },
+				{ title: "Class Tests Access", included: true },
+				{ title: "Standard Progress Tracking", included: true },
+				{ title: "Advanced Practice Tests", included: false },
+				{ title: "Pronunciation Analysis", included: false },
+				{ title: "AI-Powered Feedback", included: false },
+				{ title: "Personalized Learning Path", included: false },
+			],
+		},
+		{
+			id: "fluence",
+			name: "Fluence",
+			description:
+				"For serious learners who want AI-powered personalized learning",
+			color: COLORS.neonPurple,
+			icon: "star-circle",
+			features: [
+				{
+					title: "Listen, Speak, Read, Write, Type, Prompt in English",
+					included: true,
+				},
+				{ title: "Basic Practice Tests", included: true },
+				{ title: "Class Tests Access", included: true },
+				{ title: "Standard Progress Tracking", included: true },
+				{ title: "Advanced Practice Tests", included: true },
+				{ title: "Pronunciation Analysis", included: true },
+				{ title: "AI-Powered Feedback", included: true },
+				{ title: "Personalized Learning Path", included: true },
+			],
+		},
+	];
 
 	const goBack = () => {
 		navigation.goBack();
@@ -109,17 +129,174 @@ export default function PremiumScreen() {
 		}, 1500);
 	};
 
-	const getCurrentPrice = () => {
-		return pricing[selectedPlan][billingCycle];
-	};
-
-	const getMonthlyPrice = () => {
+	const getMonthlyPrice = (planId) => {
 		if (billingCycle === "monthly") {
-			return pricing[selectedPlan].monthly;
+			return pricing[planId].monthly;
 		} else {
 			// Calculate the monthly equivalent from the yearly price
-			return (pricing[selectedPlan].yearly / 12).toFixed(2);
+			return (pricing[planId].yearly / 12).toFixed(2);
 		}
+	};
+
+	const getPlanById = (id) => {
+		return plans.find((plan) => plan.id === id);
+	};
+
+	const renderPlanCard = (plan) => {
+		const isSelected = selectedPlan === plan.id;
+
+		return (
+			<TouchableOpacity
+				onPress={() => setSelectedPlan(plan.id)}
+				style={[
+					styles.planCard,
+					isSelected && styles.selectedPlanCard,
+					{ borderColor: isSelected ? plan.color : "rgba(255, 255, 255, 0.1)" },
+				]}
+			>
+				<LinearGradient
+					colors={[
+						isSelected ? `${plan.color}20` : "rgba(255, 255, 255, 0.05)",
+						isSelected ? `${plan.color}05` : "rgba(255, 255, 255, 0.02)",
+					]}
+					style={styles.planCardGradient}
+					start={{ x: 0, y: 0 }}
+					end={{ x: 1, y: 1 }}
+				>
+					{isSelected && (
+						<View
+							style={[styles.selectedBadge, { backgroundColor: plan.color }]}
+						>
+							<Text style={styles.selectedBadgeText}>SELECTED</Text>
+						</View>
+					)}
+
+					<View
+						style={[
+							styles.planIconContainer,
+							{ backgroundColor: `${plan.color}30` },
+						]}
+					>
+						<MaterialCommunityIcons
+							name={plan.icon}
+							size={32}
+							color={plan.color}
+						/>
+					</View>
+
+					<Text style={styles.planCardTitle}>{plan.name}</Text>
+					<Text style={styles.planCardDescription}>{plan.description}</Text>
+
+					<View style={styles.planPriceContainer}>
+						<Text
+							style={[
+								styles.planPrice,
+								{ color: isSelected ? plan.color : COLORS.textPrimary },
+							]}
+						>
+							{getMonthlyPrice(plan.id)}
+						</Text>
+						<Text style={styles.planCurrencySymbol}> Rs</Text>
+
+						<View style={styles.planPriceDetailsContainer}>
+							<Text style={styles.planPricePerMonth}>/month</Text>
+							{billingCycle === "yearly" && (
+								<Text style={styles.planBilledAnnually}>billed annually</Text>
+							)}
+						</View>
+					</View>
+
+					{billingCycle === "yearly" && (
+						<View
+							style={[
+								styles.planSavingsBadge,
+								{ backgroundColor: `${COLORS.neonGreen}20` },
+							]}
+						>
+							<Text style={styles.planSavingsText}>
+								Save {pricing[plan.id].yearlySavings}% with annual billing
+							</Text>
+						</View>
+					)}
+
+					<View style={styles.planFeatureList}>
+						{plan.features.slice(0, 4).map((feature, index) => (
+							<View key={index} style={styles.planFeatureItem}>
+								<MaterialCommunityIcons
+									name={feature.included ? "check-circle" : "close-circle"}
+									size={18}
+									color={
+										feature.included
+											? isSelected
+												? plan.color
+												: COLORS.neonGreen
+											: "rgba(255,255,255,0.3)"
+									}
+								/>
+								<Text
+									style={[
+										styles.planFeatureText,
+										!feature.included && styles.planFeatureTextDisabled,
+									]}
+								>
+									{feature.title}
+								</Text>
+							</View>
+						))}
+						{plan.id === "fluence" && (
+							<View
+								style={[
+									styles.aiPoweredTag,
+									{ backgroundColor: `${plan.color}20` },
+								]}
+							>
+								<MaterialCommunityIcons
+									name="robot"
+									size={16}
+									color={plan.color}
+								/>
+								<Text style={[styles.aiPoweredText, { color: plan.color }]}>
+									AI-Powered
+								</Text>
+							</View>
+						)}
+					</View>
+				</LinearGradient>
+			</TouchableOpacity>
+		);
+	};
+
+	const renderFeaturesComparison = () => {
+		const currentPlan = getPlanById(selectedPlan);
+		return (
+			<View style={styles.featuresComparisonCard}>
+				<Text style={styles.featuresComparisonTitle}>Plan Features</Text>
+
+				{currentPlan.features.map((feature, index) => (
+					<View key={index} style={styles.featureComparisonRow}>
+						<View style={styles.featureComparisonTextContainer}>
+							<Text
+								style={[
+									styles.featureComparisonText,
+									!feature.included && styles.featureComparisonTextDisabled,
+								]}
+							>
+								{feature.title}
+							</Text>
+						</View>
+						<View style={styles.featureComparisonIndicator}>
+							<MaterialCommunityIcons
+								name={feature.included ? "check-circle" : "minus-circle"}
+								size={22}
+								color={
+									feature.included ? COLORS.neonGreen : "rgba(255,255,255,0.2)"
+								}
+							/>
+						</View>
+					</View>
+				))}
+			</View>
+		);
 	};
 
 	return (
@@ -168,54 +345,19 @@ export default function PremiumScreen() {
 							</View>
 						) : (
 							<View style={styles.subscriptionStatusContainer}>
-								<Text style={styles.noSubscriptionText}>No Active Premium</Text>
+								<Text style={styles.noSubscriptionText}>
+									Unlock Premium Features
+								</Text>
 								<Text style={styles.subscribePromptText}>
-									Subscribe to unlock premium features and accelerate your
-									learning
+									Choose a plan that fits your learning goals
 								</Text>
 							</View>
 						)}
 					</Animated.View>
 
 					<Animated.View entering={FadeInDown.delay(200).duration(400)}>
-						<View style={styles.selectionContainer}>
-							<View style={styles.planToggleContainer}>
-								<TouchableOpacity
-									style={[
-										styles.planToggleButton,
-										selectedPlan === "foundation" &&
-											styles.planToggleButtonActive,
-									]}
-									onPress={() => setSelectedPlan("foundation")}
-								>
-									<Text
-										style={[
-											styles.planToggleText,
-											selectedPlan === "foundation" &&
-												styles.planToggleTextActive,
-										]}
-									>
-										Foundation
-									</Text>
-								</TouchableOpacity>
-								<TouchableOpacity
-									style={[
-										styles.planToggleButton,
-										selectedPlan === "fluence" && styles.planToggleButtonActive,
-									]}
-									onPress={() => setSelectedPlan("fluence")}
-								>
-									<Text
-										style={[
-											styles.planToggleText,
-											selectedPlan === "fluence" && styles.planToggleTextActive,
-										]}
-									>
-										Fluence
-									</Text>
-								</TouchableOpacity>
-							</View>
-
+						<View style={styles.billingCycleContainer}>
+							<Text style={styles.billingCycleLabel}>Billing Cycle:</Text>
 							<View style={styles.billingToggleContainer}>
 								<Text
 									style={[
@@ -257,72 +399,43 @@ export default function PremiumScreen() {
 						</View>
 					</Animated.View>
 
-					<Animated.View entering={FadeInDown.delay(300).duration(400)}>
-						<View style={styles.pricingCard}>
-							<Text style={styles.planName}>
-								{selectedPlan === "foundation" ? "Foundation" : "Fluence"} Plan
-							</Text>
-							<View style={styles.priceContainer}>
-								<Text style={styles.currencySymbol}>$</Text>
-								<Text style={styles.price}>{getMonthlyPrice()}</Text>
-								<View style={styles.billingFrequencyContainer}>
-									<Text style={styles.perMonth}>/month</Text>
-									{billingCycle === "yearly" && (
-										<Text style={styles.billedAnnually}>billed annually</Text>
-									)}
-								</View>
-							</View>
+					<View style={styles.planCardsContainer}>
+						{plans.map((plan, index) => (
+							<Animated.View
+								key={plan.id}
+								entering={FadeInDown.delay(300 + index * 100).duration(400)}
+								style={styles.planCardContainer}
+							>
+								{renderPlanCard(plan)}
+							</Animated.View>
+						))}
+					</View>
 
-							{billingCycle === "yearly" && (
-								<View style={styles.savingsContainer}>
-									<Text style={styles.savingsInfoText}>
-										Total: ${pricing[selectedPlan].yearly} per year{" "}
-										<Text style={styles.savingsHighlight}>
-											(Save ${pricing[selectedPlan].yearlySavings}%)
-										</Text>
-									</Text>
-								</View>
-							)}
-						</View>
-					</Animated.View>
+					{/* <Animated.View entering={FadeInDown.delay(500).duration(400)}>
+						{renderFeaturesComparison()}
+					</Animated.View> */}
 
-					<Animated.View entering={FadeInDown.delay(400).duration(400)}>
-						<View style={styles.featuresContainer}>
-							<Text style={styles.featuresTitle}>What's Included</Text>
-
-							{features[selectedPlan].map((feature, index) => (
-								<View key={index} style={styles.featureItem}>
-									<MaterialCommunityIcons
-										name={feature.included ? "check-circle" : "close-circle"}
-										size={22}
-										color={
-											feature.included
-												? COLORS.neonGreen
-												: "rgba(255,255,255,0.3)"
-										}
-										style={styles.featureIcon}
-									/>
-									<Text
-										style={[
-											styles.featureText,
-											!feature.included && styles.featureTextDisabled,
-										]}
-									>
-										{feature.title}
-									</Text>
-								</View>
-							))}
-						</View>
-					</Animated.View>
-
-					{selectedPlan === "fluence" && (
-						<Animated.View entering={FadeInDown.delay(500).duration(400)}>
+					{/* {selectedPlan === "fluence" && (
+						<Animated.View entering={FadeInDown.delay(600).duration(400)}>
 							<View style={styles.aiAdvantageContainer}>
-								<Text style={styles.aiAdvantageTitle}>
-									AI-Powered Learning Advantage
+								<View style={styles.aiHeaderRow}>
+									<MaterialCommunityIcons
+										name="brain"
+										size={24}
+										color={COLORS.neonPurple}
+									/>
+									<Text style={styles.aiAdvantageTitle}>
+										AI-Powered Learning Advantage
+									</Text>
+								</View>
+
+								<Text style={styles.aiAdvantageSubtitle}>
+									Fluence Plan includes powerful AI features that analyze your
+									learning patterns and customize your experience
 								</Text>
-								<View style={styles.aiFeatureRow}>
-									<View style={styles.aiFeature}>
+
+								<View style={styles.aiFeatureGrid}>
+									<View style={styles.aiFeatureItem}>
 										<View
 											style={[
 												styles.aiFeatureIconBg,
@@ -341,7 +454,7 @@ export default function PremiumScreen() {
 										</Text>
 									</View>
 
-									<View style={styles.aiFeature}>
+									<View style={styles.aiFeatureItem}>
 										<View
 											style={[
 												styles.aiFeatureIconBg,
@@ -359,28 +472,84 @@ export default function PremiumScreen() {
 											Personalized learning journey based on your goals
 										</Text>
 									</View>
+
+									<View style={styles.aiFeatureItem}>
+										<View
+											style={[
+												styles.aiFeatureIconBg,
+												{ backgroundColor: `${COLORS.neonGreen}30` },
+											]}
+										>
+											<MaterialCommunityIcons
+												name="microphone"
+												size={24}
+												color={COLORS.neonGreen}
+											/>
+										</View>
+										<Text style={styles.aiFeatureTitle}>
+											Pronunciation Coach
+										</Text>
+										<Text style={styles.aiFeatureDescription}>
+											Real-time feedback on your spoken English
+										</Text>
+									</View>
+
+									<View style={styles.aiFeatureItem}>
+										<View
+											style={[
+												styles.aiFeatureIconBg,
+												{ backgroundColor: `${COLORS.neonOrange}30` },
+											]}
+										>
+											<MaterialCommunityIcons
+												name="progress-check"
+												size={24}
+												color={COLORS.neonOrange}
+											/>
+										</View>
+										<Text style={styles.aiFeatureTitle}>Adaptive Testing</Text>
+										<Text style={styles.aiFeatureDescription}>
+											Tests that adjust to your skill level in real-time
+										</Text>
+									</View>
 								</View>
 							</View>
 						</Animated.View>
-					)}
+					)} */}
 
 					<Animated.View
-						entering={FadeInDown.delay(600).duration(400)}
+						entering={FadeInDown.delay(700).duration(400)}
 						style={styles.actionButtonsContainer}
 					>
 						{!hasActiveSubscription && (
 							<>
 								<TouchableOpacity
-									style={styles.freeTrialButton}
+									style={[
+										styles.freeTrialButton,
+										{
+											backgroundColor:
+												selectedPlan === "foundation"
+													? COLORS.neonBlue
+													: COLORS.neonPurple,
+										},
+									]}
 									onPress={handleFreeTrial}
 									disabled={isLoading}
 								>
 									{isLoading ? (
 										<ActivityIndicator color={COLORS.textPrimary} />
 									) : (
-										<Text style={styles.freeTrialButtonText}>
-											Start 7-Day Free Trial
-										</Text>
+										<>
+											<MaterialCommunityIcons
+												name="trophy"
+												size={20}
+												color={COLORS.textPrimary}
+												style={styles.buttonIcon}
+											/>
+											<Text style={styles.freeTrialButtonText}>
+												Start 7-Day Free Trial
+											</Text>
+										</>
 									)}
 								</TouchableOpacity>
 								<Text style={styles.trialNoteText}>
@@ -393,13 +562,25 @@ export default function PremiumScreen() {
 									onPress={handlePurchase}
 									disabled={isLoading}
 								>
-									<Text style={styles.subscribeButtonText}>Buy Now</Text>
+									<MaterialCommunityIcons
+										name="credit-card-outline"
+										size={20}
+										color={COLORS.textPrimary}
+										style={styles.buttonIcon}
+									/>
+									<Text style={styles.subscribeButtonText}>Subscribe Now</Text>
 								</TouchableOpacity>
 							</>
 						)}
 
 						{hasActiveSubscription && (
 							<TouchableOpacity style={styles.managePlanButton}>
+								<MaterialCommunityIcons
+									name="cog-outline"
+									size={20}
+									color={COLORS.textPrimary}
+									style={styles.buttonIcon}
+								/>
 								<Text style={styles.managePlanButtonText}>Manage Plan</Text>
 							</TouchableOpacity>
 						)}
@@ -473,7 +654,7 @@ const styles = StyleSheet.create({
 	},
 	noSubscriptionText: {
 		color: COLORS.textPrimary,
-		fontSize: 20,
+		fontSize: 22,
 		fontWeight: "700",
 		marginBottom: 5,
 	},
@@ -483,38 +664,23 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		paddingHorizontal: 20,
 	},
-	selectionContainer: {
+	billingCycleContainer: {
 		marginBottom: 20,
 	},
-	planToggleContainer: {
-		flexDirection: "row",
-		backgroundColor: "rgba(255, 255, 255, 0.1)",
-		borderRadius: 10,
-		marginBottom: 20,
-		padding: 4,
-	},
-	planToggleButton: {
-		flex: 1,
-		paddingVertical: 12,
-		alignItems: "center",
-		borderRadius: 8,
-	},
-	planToggleButtonActive: {
-		backgroundColor: "rgba(255, 255, 255, 0.15)",
-	},
-	planToggleText: {
-		color: COLORS.textSecondary,
-		fontWeight: "600",
-		fontSize: 16,
-	},
-	planToggleTextActive: {
+	billingCycleLabel: {
 		color: COLORS.textPrimary,
+		fontSize: 16,
+		fontWeight: "600",
+		marginBottom: 10,
+		textAlign: "center",
 	},
 	billingToggleContainer: {
 		flexDirection: "row",
 		justifyContent: "center",
 		alignItems: "center",
-		marginBottom: 10,
+		backgroundColor: "rgba(255, 255, 255, 0.08)",
+		borderRadius: 12,
+		padding: 10,
 	},
 	billingText: {
 		color: COLORS.textSecondary,
@@ -543,106 +709,199 @@ const styles = StyleSheet.create({
 		fontSize: 10,
 		fontWeight: "700",
 	},
-	pricingCard: {
-		backgroundColor: "rgba(255, 255, 255, 0.08)",
-		borderRadius: 16,
-		padding: 20,
-		alignItems: "center",
+	planCardsContainer: {
 		marginBottom: 20,
 	},
-	planName: {
-		color: COLORS.textPrimary,
-		fontSize: 20,
-		fontWeight: "700",
-		marginBottom: 10,
+	planCardContainer: {
+		marginBottom: 16,
 	},
-	priceContainer: {
-		flexDirection: "row",
-		alignItems: "flex-start",
-		marginBottom: 5,
-	},
-	currencySymbol: {
-		color: COLORS.textPrimary,
-		fontSize: 24,
-		fontWeight: "700",
-		marginTop: 5,
-	},
-	price: {
-		color: COLORS.textPrimary,
-		fontSize: 36,
-		fontWeight: "700",
-	},
-	billingFrequencyContainer: {
-		marginLeft: 5,
-		marginTop: 8,
-	},
-	perMonth: {
-		color: COLORS.textPrimary,
-		fontSize: 16,
-	},
-	billedAnnually: {
-		color: COLORS.textSecondary,
-		fontSize: 12,
-		marginTop: 2,
-	},
-	savingsContainer: {
-		marginTop: 5,
-	},
-	savingsInfoText: {
-		color: COLORS.textSecondary,
-		fontSize: 14,
-	},
-	savingsHighlight: {
-		color: COLORS.neonGreen,
-		fontWeight: "600",
-	},
-	featuresContainer: {
-		backgroundColor: "rgba(255, 255, 255, 0.08)",
+	planCard: {
 		borderRadius: 16,
-		padding: 20,
-		marginBottom: 20,
+		borderWidth: 2,
+		overflow: "hidden",
 	},
-	featuresTitle: {
+	selectedPlanCard: {
+		shadowColor: COLORS.neonPurple,
+		shadowOffset: { width: 0, height: 0 },
+		shadowOpacity: 0.5,
+		shadowRadius: 10,
+		elevation: 10,
+	},
+	planCardGradient: {
+		padding: 16,
+		position: "relative",
+	},
+	selectedBadge: {
+		position: "absolute",
+		top: 16,
+		right: 16,
+		paddingHorizontal: 10,
+		paddingVertical: 4,
+		borderRadius: 12,
+	},
+	selectedBadgeText: {
 		color: COLORS.textPrimary,
-		fontSize: 18,
-		fontWeight: "700",
-		marginBottom: 15,
+		fontSize: 10,
+		fontWeight: "800",
 	},
-	featureItem: {
-		flexDirection: "row",
+	planIconContainer: {
+		width: 56,
+		height: 56,
+		borderRadius: 28,
+		justifyContent: "center",
 		alignItems: "center",
 		marginBottom: 12,
 	},
-	featureIcon: {
-		marginRight: 10,
-	},
-	featureText: {
+	planCardTitle: {
 		color: COLORS.textPrimary,
-		fontSize: 15,
+		fontSize: 24,
+		fontWeight: "700",
+		marginBottom: 6,
+	},
+	planCardDescription: {
+		color: COLORS.textSecondary,
+		fontSize: 14,
+		marginBottom: 16,
+		lineHeight: 20,
+	},
+	planPriceContainer: {
+		flexDirection: "row",
+		alignItems: "flex-start",
+		marginBottom: 12,
+	},
+	planCurrencySymbol: {
+		color: COLORS.textPrimary,
+		fontSize: 28,
+		fontWeight: "700",
+		marginTop: 4,
+	},
+	planPrice: {
+		fontSize: 32,
+		fontWeight: "700",
+	},
+	planPriceDetailsContainer: {
+		marginLeft: 4,
+		marginTop: 16,
+	},
+	planPricePerMonth: {
+		color: COLORS.textPrimary,
+		fontSize: 14,
+	},
+	planBilledAnnually: {
+		color: COLORS.textSecondary,
+		fontSize: 11,
+		marginTop: 2,
+	},
+	planSavingsBadge: {
+		alignSelf: "flex-start",
+		paddingHorizontal: 10,
+		paddingVertical: 5,
+		borderRadius: 12,
+		marginBottom: 16,
+	},
+	planSavingsText: {
+		color: COLORS.neonGreen,
+		fontSize: 12,
+		fontWeight: "600",
+	},
+	planFeatureList: {
+		marginTop: 12,
+	},
+	planFeatureItem: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 10,
+	},
+	planFeatureText: {
+		color: COLORS.textPrimary,
+		fontSize: 14,
+		marginLeft: 8,
 		flex: 1,
 	},
-	featureTextDisabled: {
+	planFeatureTextDisabled: {
 		color: "rgba(255, 255, 255, 0.4)",
+	},
+	aiPoweredTag: {
+		flexDirection: "row",
+		alignItems: "center",
+		alignSelf: "flex-start",
+		paddingHorizontal: 10,
+		paddingVertical: 5,
+		borderRadius: 12,
+		marginTop: 8,
+	},
+	aiPoweredText: {
+		fontSize: 12,
+		fontWeight: "600",
+		marginLeft: 5,
+	},
+	featuresComparisonCard: {
+		backgroundColor: "rgba(255, 255, 255, 0.08)",
+		borderRadius: 16,
+		padding: 16,
+		marginBottom: 20,
+	},
+	featuresComparisonTitle: {
+		color: COLORS.textPrimary,
+		fontSize: 18,
+		fontWeight: "700",
+		marginBottom: 16,
+	},
+	featureComparisonRow: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		paddingVertical: 10,
+		borderBottomWidth: 1,
+		borderBottomColor: "rgba(255, 255, 255, 0.05)",
+	},
+	featureComparisonTextContainer: {
+		flex: 1,
+	},
+	featureComparisonText: {
+		color: COLORS.textPrimary,
+		fontSize: 14,
+	},
+	featureComparisonTextDisabled: {
+		color: "rgba(255, 255, 255, 0.4)",
+	},
+	featureComparisonIndicator: {
+		marginLeft: 10,
 	},
 	aiAdvantageContainer: {
 		backgroundColor: "rgba(255, 255, 255, 0.08)",
 		borderRadius: 16,
-		padding: 20,
+		padding: 16,
 		marginBottom: 20,
+		borderWidth: 1,
+		borderColor: `${COLORS.neonPurple}40`,
+	},
+	aiHeaderRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 12,
 	},
 	aiAdvantageTitle: {
 		color: COLORS.textPrimary,
 		fontSize: 18,
 		fontWeight: "700",
-		marginBottom: 15,
+		marginLeft: 10,
 	},
-	aiFeatureRow: {
+	aiAdvantageSubtitle: {
+		color: COLORS.textSecondary,
+		fontSize: 14,
+		marginBottom: 20,
+		lineHeight: 20,
+	},
+	aiFeatureGrid: {
 		flexDirection: "row",
+		flexWrap: "wrap",
 		justifyContent: "space-between",
 	},
-	aiFeature: {
+	aiFeatureItem: {
 		width: "48%",
 		alignItems: "center",
+		marginBottom: 20,
 	},
 	aiFeatureIconBg: {
 		width: 50,
@@ -657,22 +916,27 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: "600",
 		marginBottom: 5,
+		textAlign: "center",
 	},
 	aiFeatureDescription: {
 		color: COLORS.textSecondary,
 		fontSize: 12,
 		textAlign: "center",
-		lineHeight: 18,
+		lineHeight: 16,
 	},
 	actionButtonsContainer: {
 		marginBottom: 20,
 	},
 	freeTrialButton: {
-		backgroundColor: COLORS.neonPurple,
-		paddingVertical: 14,
-		borderRadius: 12,
+		flexDirection: "row",
+		justifyContent: "center",
 		alignItems: "center",
+		paddingVertical: 16,
+		borderRadius: 12,
 		marginBottom: 8,
+	},
+	buttonIcon: {
+		marginRight: 8,
 	},
 	freeTrialButtonText: {
 		color: COLORS.textPrimary,
@@ -686,10 +950,12 @@ const styles = StyleSheet.create({
 		marginBottom: 15,
 	},
 	subscribeButton: {
-		backgroundColor: COLORS.neonBlue,
-		paddingVertical: 14,
-		borderRadius: 12,
+		flexDirection: "row",
+		justifyContent: "center",
 		alignItems: "center",
+		backgroundColor: COLORS.neonBlue,
+		paddingVertical: 16,
+		borderRadius: 12,
 	},
 	subscribeButtonText: {
 		color: COLORS.textPrimary,
@@ -697,10 +963,12 @@ const styles = StyleSheet.create({
 		fontWeight: "700",
 	},
 	managePlanButton: {
-		backgroundColor: COLORS.neonBlue,
-		paddingVertical: 14,
-		borderRadius: 12,
+		flexDirection: "row",
+		justifyContent: "center",
 		alignItems: "center",
+		backgroundColor: COLORS.neonBlue,
+		paddingVertical: 16,
+		borderRadius: 12,
 	},
 	managePlanButtonText: {
 		color: COLORS.textPrimary,

@@ -61,7 +61,7 @@ export default function CustomDrawerContent(
 					</View>
 				</View>
 
-				<View
+				{/* <View
 					style={[
 						styles.statsContainer,
 						{
@@ -100,7 +100,7 @@ export default function CustomDrawerContent(
 							Skills
 						</Text>
 					</View>
-				</View>
+				</View> */}
 
 				<View
 					style={[

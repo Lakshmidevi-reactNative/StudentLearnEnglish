@@ -1,3 +1,4 @@
+// New code
 import React, { useState } from "react";
 import {
 	View,
@@ -41,7 +42,7 @@ const schoolClasses = [
 						title: "Parts of Speech Practice",
 						dueDate: "2025-03-15",
 						status: "completed",
-						type: "Multiple Choice",
+						type: "Language Practice",
 						questions: 15,
 						duration: "30 mins",
 						preview:
@@ -52,7 +53,7 @@ const schoolClasses = [
 						title: "Tense Formation Exercise",
 						dueDate: "2025-03-20",
 						status: "pending",
-						type: "Fill in the Blanks",
+						type: "Typing Practice",
 						questions: 20,
 						duration: "45 mins",
 						preview:
@@ -63,7 +64,7 @@ const schoolClasses = [
 						title: "Sentence Structure Analysis",
 						dueDate: "2025-03-22",
 						status: "pending",
-						type: "Essay",
+						type: "RolePlay Practice",
 						questions: 5,
 						duration: "60 mins",
 						preview:
