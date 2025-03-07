@@ -27,7 +27,8 @@ export default function LearnScreen() {
 			color: COLORS.neonBlue,
 			description: "Improve your listening skills with audio lessons",
 			progress: 85,
-			route: "ListenEng",
+			route: "Contents", // Changed to navigate to Contents screen
+			redirectType: "listen", // Added param to identify the source
 		},
 		{
 			icon: "microphone",
@@ -35,7 +36,7 @@ export default function LearnScreen() {
 			color: COLORS.neonPurple,
 			description: "Practice pronunciation and conversation",
 			progress: 70,
-			route: "SpeakEng",
+			route: "SpeakEng", // Keeps navigating to SpeakEng directly
 		},
 		{
 			icon: "book-open",
@@ -43,7 +44,8 @@ export default function LearnScreen() {
 			color: COLORS.neonGreen,
 			description: "Enhance reading comprehension with diverse texts",
 			progress: 90,
-			route: "ReadEng",
+			route: "Contents", // Changed to navigate to Contents screen
+			redirectType: "read", // Added param to identify the source
 		},
 		{
 			icon: "pencil-alt",
@@ -51,7 +53,7 @@ export default function LearnScreen() {
 			color: COLORS.neonOrange,
 			description: "Develop writing skills with guided exercises",
 			progress: 65,
-			route: "WriteEng",
+			route: "WriteEng", // Keeps navigating to WriteEng directly
 		},
 		{
 			icon: "comment",
@@ -59,7 +61,7 @@ export default function LearnScreen() {
 			color: COLORS.neonPink,
 			description: "Practice with AI conversation partners",
 			progress: 75,
-			route: "PromptEng",
+			route: "PromptEng", // Keeps navigating to PromptEng directly
 		},
 		{
 			icon: "keyboard",
@@ -67,9 +69,21 @@ export default function LearnScreen() {
 			color: COLORS.neonYellow,
 			description: "Improve typing speed and accuracy",
 			progress: 65,
-			route: "TypeEng",
+			route: "Contents", // Changed to navigate to Contents screen
+			redirectType: "type", // Added param to identify the source
 		},
 	];
+
+	// Handle navigation with source type
+	const handleNavigation = (option) => {
+		if (option.redirectType) {
+			// For options that should go to ContentListTemplate
+			navigation.navigate(option.route, { sourceType: option.redirectType });
+		} else {
+			// For options that go directly to their own screens
+			navigation.navigate(option.route);
+		}
+	};
 
 	return (
 		<LinearGradient
@@ -98,7 +112,7 @@ export default function LearnScreen() {
 						>
 							<TouchableOpacity
 								style={styles.activityCard}
-								onPress={() => navigation.navigate(option.route)}
+								onPress={() => handleNavigation(option)}
 							>
 								<View
 									style={[

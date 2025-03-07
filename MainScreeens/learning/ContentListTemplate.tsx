@@ -116,7 +116,7 @@ export default function ContentListTemplate() {
 	const [contentDescription, setContentDescription] = useState("");
 
 	const goBack = () => {
-		navigation.navigate("Learn");
+		navigation.navigate("LearnMain");
 	};
 
 	// Show upload method selection modal

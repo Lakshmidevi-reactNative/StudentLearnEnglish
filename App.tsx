@@ -5,7 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Toaster } from "sonner-native";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
 	MaterialCommunityIcons,
 	FontAwesome5,
@@ -28,6 +28,7 @@ import TypingPracticeScreen from "./MainScreeens/assignments/TypingPracticeScree
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
+const LearnStack = createNativeStackNavigator();
 
 // Placeholder screens with common gradient background
 const CommonScreen = ({ title, subtitle = "Coming soon..." }) => {
@@ -59,12 +60,30 @@ import ReadEngScreen from "./MainScreeens/learning/ReadEngScreen";
 import WriteEngScreen from "./MainScreeens/learning/WriteEngScreen";
 import TypeEngScreen from "./MainScreeens/learning/TypeEngScreen";
 import PromptEngScreen from "./MainScreeens/learning/PromptEngScreen";
+import ContentListTemplate from "./MainScreeens/learning/ContentListTemplate";
 
 import ClassesScreen from "./MainScreeens/ClassesScreen";
 import { COLORS } from "./MainScreeens/constants/Colors";
 import { useTheme } from "./MainScreeens/constants/ThemeContext";
 
 import PremiumScreen from "./MainScreeens/PremiumScreen";
+
+// Learn Stack Navigator - manages the learning section flow
+function LearnStackNavigator() {
+	return (
+		<LearnStack.Navigator screenOptions={{ headerShown: false }}>
+			<LearnStack.Screen name="LearnMain" component={LearnScreen} />
+			<LearnStack.Screen name="Contents" component={ContentListTemplate} />
+			<LearnStack.Screen name="ListenEng" component={ListenEngScreen} />
+			<LearnStack.Screen name="SpeakEng" component={SpeakEngScreen} />
+			<LearnStack.Screen name="ReadEng" component={ReadEngScreen} />
+			<LearnStack.Screen name="WriteEng" component={WriteEngScreen} />
+			<LearnStack.Screen name="TypeEng" component={TypeEngScreen} />
+			<LearnStack.Screen name="PromptEng" component={PromptEngScreen} />
+		</LearnStack.Navigator>
+	);
+}
+
 // Bottom tab navigator
 function TabNavigator() {
 	return (
@@ -73,7 +92,7 @@ function TabNavigator() {
 			screenOptions={{ headerShown: false }}
 		>
 			<Tab.Screen name="Home" component={HomeScreen} />
-			<Tab.Screen name="Learn" component={LearnScreen} />
+			<Tab.Screen name="Learn" component={LearnStackNavigator} />
 			<Tab.Screen name="Classes" component={ClassesScreen} />
 			<Tab.Screen
 				name="Resources"
@@ -87,7 +106,7 @@ function TabNavigator() {
 // Main drawer navigator
 function DrawerNavigator() {
 	const { colors } = useTheme();
-	
+
 	return (
 		<Drawer.Navigator
 			drawerContent={(props) => <CustomDrawerContent {...props} />}
@@ -113,7 +132,7 @@ function DrawerNavigator() {
 			/>
 			<Drawer.Screen
 				name="Learn"
-				component={LearnScreen}
+				component={LearnStackNavigator}
 				options={{
 					title: "Learn & Practice",
 					drawerIcon: ({ color }) => (
@@ -153,18 +172,12 @@ function RootStack() {
 	return (
 		<Stack.Navigator screenOptions={{ headerShown: false }}>
 			<Stack.Screen name="Main" component={DrawerNavigator} />
-			<Stack.Screen name="ListenEng" component={ListenEngScreen} />
-			<Stack.Screen name="SpeakEng" component={SpeakEngScreen} />
-			<Stack.Screen name="ReadEng" component={ReadEngScreen} />
-			<Stack.Screen name="WriteEng" component={WriteEngScreen} />
-			<Stack.Screen name="TypeEng" component={TypeEngScreen} />
-			<Stack.Screen name="PromptEng" component={PromptEngScreen} />
 			<Stack.Screen name="ResourceDetail" component={ResourceDetailScreen} />
 			<Stack.Screen name="Profile" component={ProfileScreen} />
 			<Stack.Screen name="RoleplayAttempt" component={RoleplayAttemptScreen} />
-      <Stack.Screen name="LanguageAttempt" component={LanguageAttemptScreen} />
-      {/* <Stack.Screen name="LanguagePractice" component={LanguagePracticeScreen} /> */}
-      <Stack.Screen name="TypingPractice" component={TypingPracticeScreen} />
+			<Stack.Screen name="LanguageAttempt" component={LanguageAttemptScreen} />
+			{/* <Stack.Screen name="LanguagePractice" component={LanguagePracticeScreen} /> */}
+			<Stack.Screen name="TypingPractice" component={TypingPracticeScreen} />
 		</Stack.Navigator>
 	);
 }
