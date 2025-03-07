@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Toaster } from "sonner-native";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
 	MaterialCommunityIcons,
 	FontAwesome5,
@@ -17,7 +18,11 @@ import AnimatedTabBar from "./MainScreeens/AnimatedTabBar";
 import ResourceDetailScreen from "./MainScreeens/ResourceDetailScreen";
 import ResourcesScreen from "./MainScreeens/ResourcesScreen";
 import ProfileScreen from "./MainScreeens/ProfileScreen";
-import { useTheme } from "./MainScreeens/constants/ThemeContext";
+import { ThemeProvider } from "./MainScreeens/constants/ThemeContext";
+import RoleplayAttemptScreen from "./MainScreeens/assignments/RoleplayAttemptScreen";
+import LanguageAttemptScreen from "./MainScreeens/assignments/LanguageAttemptScreen";
+// import LanguagePracticeScreen from "./MainScreeens/assignments/LanguagePracticeScreen"; // Import the new screen
+import TypingPracticeScreen from "./MainScreeens/assignments/TypingPracticeScreen";
 
 // Create navigators
 const Stack = createNativeStackNavigator();
@@ -57,6 +62,7 @@ import PromptEngScreen from "./MainScreeens/learning/PromptEngScreen";
 
 import ClassesScreen from "./MainScreeens/ClassesScreen";
 import { COLORS } from "./MainScreeens/constants/Colors";
+import { useTheme } from "./MainScreeens/constants/ThemeContext";
 
 import PremiumScreen from "./MainScreeens/PremiumScreen";
 // Bottom tab navigator
@@ -80,15 +86,17 @@ function TabNavigator() {
 
 // Main drawer navigator
 function DrawerNavigator() {
+	const { colors } = useTheme();
+	
 	return (
 		<Drawer.Navigator
 			drawerContent={(props) => <CustomDrawerContent {...props} />}
 			screenOptions={{
 				headerShown: false,
-				drawerActiveTintColor: COLORS.neonBlue,
-				drawerInactiveTintColor: COLORS.textSecondary,
+				drawerActiveTintColor: colors.neonBlue,
+				drawerInactiveTintColor: colors.textSecondary,
 				drawerStyle: {
-					backgroundColor: COLORS.deepBlue,
+					backgroundColor: colors.deepBlue,
 					width: 280,
 				},
 			}}
@@ -153,18 +161,26 @@ function RootStack() {
 			<Stack.Screen name="PromptEng" component={PromptEngScreen} />
 			<Stack.Screen name="ResourceDetail" component={ResourceDetailScreen} />
 			<Stack.Screen name="Profile" component={ProfileScreen} />
+			<Stack.Screen name="RoleplayAttempt" component={RoleplayAttemptScreen} />
+      <Stack.Screen name="LanguageAttempt" component={LanguageAttemptScreen} />
+      {/* <Stack.Screen name="LanguagePractice" component={LanguagePracticeScreen} /> */}
+      <Stack.Screen name="TypingPractice" component={TypingPracticeScreen} />
 		</Stack.Navigator>
 	);
 }
 
 export default function App() {
 	return (
-		<SafeAreaProvider style={styles.container}>
-			<Toaster />
-			<NavigationContainer>
-				<RootStack />
-			</NavigationContainer>
-		</SafeAreaProvider>
+		<GestureHandlerRootView style={styles.container}>
+			<ThemeProvider>
+				<SafeAreaProvider style={styles.container}>
+					<Toaster />
+					<NavigationContainer>
+						<RootStack />
+					</NavigationContainer>
+				</SafeAreaProvider>
+			</ThemeProvider>
+		</GestureHandlerRootView>
 	);
 }
 

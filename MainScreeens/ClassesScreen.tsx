@@ -23,6 +23,7 @@ import {
 import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
 import { COLORS } from "./constants/Colors";
 import { toast } from "sonner-native";
+import { useNavigation } from "@react-navigation/native";
 
 // Enhanced mock data for school classes with subjects having assessments and assignments
 const schoolClasses = [
@@ -41,7 +42,7 @@ const schoolClasses = [
 						id: 1,
 						title: "Parts of Speech Practice",
 						dueDate: "2025-03-15",
-						status: "completed",
+						status: "pending",
 						type: "Language Practice",
 						questions: 15,
 						duration: "30 mins",
@@ -61,6 +62,39 @@ const schoolClasses = [
 					},
 					{
 						id: 3,
+						title: "Sentence Structure Analysis",
+						dueDate: "2025-03-22",
+						status: "pending",
+						type: "RolePlay Practice",
+						questions: 5,
+						duration: "60 mins",
+						preview:
+							"Analyze sentence structures and improve your writing by understanding syntax.",
+					},
+					{
+						id: 11,
+						title: "Parts of Speech Practice",
+						dueDate: "2025-03-15",
+						status: "completed",
+						type: "Language Practice",
+						questions: 15,
+						duration: "30 mins",
+						preview:
+							"This assignment covers nouns, verbs, adjectives, and adverbs usage in sentences.",
+					},
+					{
+						id: 12,
+						title: "Tense Formation Exercise",
+						dueDate: "2025-03-20",
+						status: "pending",
+						type: "Typing Practice",
+						questions: 20,
+						duration: "45 mins",
+						preview:
+							"Practice forming past, present, and future tenses in various contexts.",
+					},
+					{
+						id: 13,
 						title: "Sentence Structure Analysis",
 						dueDate: "2025-03-22",
 						status: "pending",
@@ -860,12 +894,21 @@ export default function ClassesScreen() {
 	const handleContentItemPress = (item) => {
 		setSelectedContentItem(item);
 		setCurrentPage("detail");
-	};
-
-	const handleAttemptAssignment = (item) => {
-		// In a real app, this would navigate to the assignment interface
-		toast.success(`Starting assignment: ${item.title}`);
-	};
+	};  const navigation = useNavigation();
+  
+  const handleAttemptAssignment = (item) => {
+    // Navigate to the appropriate assignment screen based on type
+    if (item.type === "RolePlay Practice") {
+      navigation.navigate("RoleplayAttempt", { assignment: item });
+    } else if (item.type === "Language Practice") {
+      navigation.navigate("LanguageAttempt", { assignment: item });
+    } else if (item.type === "Typing Practice") {
+      navigation.navigate("TypingPractice", { assignment: item });
+    } else {
+      // Fallback for other types
+      toast.success(`Starting assignment: ${item.title}`);
+    }
+  };
 
 	const handleJoinClass = () => {
 		// Simple validation - in a real app this would check against a database
@@ -1070,8 +1113,10 @@ export default function ClassesScreen() {
 					>
 						<Text style={styles.attemptButtonText}>Attempt Now</Text>
 					</TouchableOpacity>
-				) : (
-					<TouchableOpacity style={styles.reviewButton}>
+				) : (					<TouchableOpacity 
+            style={styles.reviewButton}
+            onPress={() => handleContentItemPress(item)}
+          >
 						<Text style={styles.reviewButtonText}>Review</Text>
 					</TouchableOpacity>
 				)}
@@ -1749,15 +1794,19 @@ export default function ClassesScreen() {
 						>
 							<Text style={styles.startButtonText}>Start Assignment</Text>
 						</TouchableOpacity>
-					) : (
-						<TouchableOpacity style={styles.reviewDetailButton}>
+					) : (						<TouchableOpacity 
+              style={styles.reviewDetailButton}
+              onPress={() => toast.info("Reviewing previous submission...")}
+            >
 							<Text style={styles.reviewDetailButtonText}>
 								Review Submission
 							</Text>
 						</TouchableOpacity>
 					)
-				) : (
-					<TouchableOpacity style={styles.viewDetailButton}>
+				) : (					<TouchableOpacity 
+            style={styles.viewDetailButton}
+            onPress={() => toast.info("Viewing detailed assessment results...")}
+          >
 						<Text style={styles.viewDetailButtonText}>
 							View Detailed Results
 						</Text>

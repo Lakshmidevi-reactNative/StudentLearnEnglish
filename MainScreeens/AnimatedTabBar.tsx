@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTheme } from "./constants/ThemeContext";
 
 const { width } = Dimensions.get("window");
 
@@ -20,19 +21,6 @@ interface TabIconProps {
 	focused: boolean;
 	color: string;
 }
-
-// Dark Theme Colors
-const COLORS = {
-	deepBlue: "#0B1033",
-	softPurple: "#302253",
-	neonBlue: "#00B4FF",
-	neonPurple: "#302253",
-	neonGreen: "#39FF14",
-	textPrimary: "#FFFFFF",
-	textSecondary: "#CCCCCC",
-	cardBg: "rgba(255, 255, 255, 0.06)",
-	cardBorder: "rgba(255, 255, 255, 0.1)",
-};
 
 const getTabIcon = ({ routeName, focused, color }: TabIconProps) => {
 	let iconName = "";
@@ -74,6 +62,7 @@ const AnimatedTabBar = ({
 	const translateY = useRef(new Animated.Value(0)).current;
 	const opacity = useRef(new Animated.Value(1)).current;
 	const insets = useSafeAreaInsets();
+	const { colors, theme } = useTheme();
 
 	const hideTabBar = () => {
 		Animated.parallel([
@@ -137,6 +126,10 @@ const AnimatedTabBar = ({
 	// Safe bottom padding (adds to existing styles)
 	const bottomPadding = Math.max(insets.bottom, 10);
 
+	const gradientColors = theme === 'dark' 
+		? ["rgba(11, 16, 51, 0.95)", "rgba(33, 33, 100, 0.95)"]
+		: ["rgba(255, 255, 255, 0.95)", "rgba(240, 240, 255, 0.95)"];
+
 	return (
 		<>
 			{/* Full screen pressable to show tab bar when hidden */}
@@ -155,7 +148,7 @@ const AnimatedTabBar = ({
 				]}
 			>
 				<LinearGradient
-					colors={["rgba(11, 16, 51, 0.95)", "rgba(33, 33, 100, 0.95)"]}
+					colors={gradientColors}
 					style={styles.gradient}
 					start={{ x: 0, y: 0 }}
 					end={{ x: 1, y: 0 }}
@@ -170,7 +163,7 @@ const AnimatedTabBar = ({
 								: route.name;
 
 						const isFocused = state.index === index;
-						const color = isFocused ? COLORS.neonBlue : COLORS.textSecondary;
+						const color = isFocused ? colors.neonBlue : colors.textSecondary;
 
 						return (
 							<TouchableOpacity
@@ -190,7 +183,7 @@ const AnimatedTabBar = ({
 								<Text style={[styles.tabLabel, { color }]}>
 									{String(label)}
 								</Text>
-								{isFocused && <View style={styles.activeIndicator} />}
+								{isFocused && <View style={[styles.activeIndicator, { backgroundColor: colors.neonBlue }]} />}
 							</TouchableOpacity>
 						);
 					})}
@@ -219,7 +212,7 @@ const styles = StyleSheet.create({
 	gradient: {
 		flexDirection: "row",
 		borderTopWidth: 1,
-		borderTopColor: COLORS.cardBorder,
+		borderTopColor: "rgba(255, 255, 255, 0.1)",
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
 		overflow: "hidden",
@@ -239,12 +232,10 @@ const styles = StyleSheet.create({
 		bottom: -1,
 		width: 8,
 		height: 2,
-		backgroundColor: COLORS.neonBlue,
 		borderRadius: 4,
 		marginTop: 4,
 	},
 	glowIcon: {
-		textShadowColor: COLORS.neonBlue,
 		textShadowOffset: { width: 0, height: 0 },
 		textShadowRadius: 10,
 	},

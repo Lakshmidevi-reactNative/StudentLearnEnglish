@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { COLORS } from "./Colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Define our theme types
 export type ThemeType = "dark" | "light";
@@ -11,7 +12,7 @@ export const themes = {
 	},
 	light: {
 		deepBlue: "#FFFFFF",
-		softPurple: "#F5F5F5",
+		softPurple: "#F0F0FF", // Lighter version for gradients
 		neonBlue: "#0085CC",
 		neonPurple: "#8000B3",
 		neonGreen: COLORS.neonGreen,
@@ -38,19 +39,54 @@ const ThemeContext = createContext<ThemeContextType>({
 	toggleTheme: () => {},
 });
 
+// Theme storage key
+const THEME_STORAGE_KEY = '@LearnEng:theme';
+
 // Create the provider component
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 	children,
 }) => {
 	const [theme, setTheme] = useState<ThemeType>("dark");
+	const [isLoading, setIsLoading] = useState(true);
+
+	// Load saved theme on startup
+	useEffect(() => {
+		const loadTheme = async () => {
+			try {
+				const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+				if (savedTheme !== null) {
+					setTheme(savedTheme as ThemeType);
+				}
+			} catch (error) {
+				console.warn('Failed to load theme preference:', error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		loadTheme();
+	}, []);
 
 	// Get current theme colors
 	const colors = themes[theme];
 
 	// Toggle between dark and light themes
-	const toggleTheme = () => {
-		setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
+	const toggleTheme = async () => {
+		const newTheme = theme === "dark" ? "light" : "dark";
+		setTheme(newTheme);
+		
+		// Save theme preference
+		try {
+			await AsyncStorage.setItem(THEME_STORAGE_KEY, newTheme);
+		} catch (error) {
+			console.warn('Failed to save theme preference:', error);
+		}
 	};
+
+	if (isLoading) {
+		// You could return a loading component here if needed
+		return null;
+	}
 
 	return (
 		<ThemeContext.Provider value={{ theme, colors, toggleTheme }}>

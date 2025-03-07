@@ -50,8 +50,12 @@ export default function CustomDrawerContent(
 						style={[
 							styles.levelBadge,
 							{
-								backgroundColor: "rgba(0, 180, 255, 0.2)",
-								borderColor: "rgba(0, 180, 255, 0.5)",
+								backgroundColor: theme === 'dark' 
+                  ? "rgba(0, 180, 255, 0.2)" 
+                  : "rgba(0, 133, 204, 0.2)",
+								borderColor: theme === 'dark'
+                  ? "rgba(0, 180, 255, 0.5)"
+                  : "rgba(0, 133, 204, 0.5)",
 							},
 						]}
 					>
@@ -60,47 +64,6 @@ export default function CustomDrawerContent(
 						</Text>
 					</View>
 				</View>
-
-				{/* <View
-					style={[
-						styles.statsContainer,
-						{
-							backgroundColor: colors.cardBg,
-							borderColor: colors.cardBorder,
-						},
-					]}
-				>
-					<View style={styles.statItem}>
-						<Text style={[styles.statNumber, { color: colors.neonPurple }]}>
-							24
-						</Text>
-						<Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-							Days
-						</Text>
-					</View>
-					<View
-						style={[styles.divider, { backgroundColor: colors.cardBorder }]}
-					/>
-					<View style={styles.statItem}>
-						<Text style={[styles.statNumber, { color: colors.neonPurple }]}>
-							385
-						</Text>
-						<Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-							Points
-						</Text>
-					</View>
-					<View
-						style={[styles.divider, { backgroundColor: colors.cardBorder }]}
-					/>
-					<View style={styles.statItem}>
-						<Text style={[styles.statNumber, { color: colors.neonPurple }]}>
-							8
-						</Text>
-						<Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-							Skills
-						</Text>
-					</View>
-				</View> */}
 
 				<View
 					style={[
