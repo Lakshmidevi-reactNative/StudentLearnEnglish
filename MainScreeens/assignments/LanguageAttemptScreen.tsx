@@ -12,12 +12,12 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
+import { COLORS } from '../constants/Colors';
 import { toast } from 'sonner-native';
 import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
-import { useTheme } from '../constants/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -45,7 +45,6 @@ export default function LanguageAttemptScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const assignment = route.params?.assignment || null;
-  const { theme, colors, toggleTheme } = useTheme();
   
   // State for practice mode
   const [activeTab, setActiveTab] = useState('words');
@@ -73,7 +72,7 @@ export default function LanguageAttemptScreen() {
     integrity: 0
   });
 
-  // Canvas reference for visualizer
+  // Canvas reference for visualizer (would need to use a native module in production)
   const visualizerRef = useRef(null);
   
   // Cleanup audio resources when component unmounts
@@ -109,6 +108,8 @@ export default function LanguageAttemptScreen() {
       
       setRecording(recording);
       setIsRecording(true);
+      
+      // Here you would start visualizer in a real implementation
       
     } catch (err) {
       console.error('Failed to start recording', err);
@@ -232,14 +233,6 @@ export default function LanguageAttemptScreen() {
     setScores(newScores);
   };
 
-  // Get color for score - will reflect score level with color intensity
-  const getScoreColor = (score) => {
-    if (score >= 90) return colors.neonGreen;
-    if (score >= 80) return colors.neonBlue;
-    if (score >= 70) return colors.neonYellow;
-    return colors.neonOrange;
-  };
-
   // Render functions for different tabs
   const renderWordsTab = () => {
     const currentWord = PRACTICE_DATA.words[currentWordIndex];
@@ -247,149 +240,83 @@ export default function LanguageAttemptScreen() {
     
     if (isAllCompleted) {
       return (
-        <Animated.View 
-          style={styles.completionContainer}
-          entering={FadeIn.duration(500)}
-        >
+        <View style={styles.completionContainer}>
           <MaterialCommunityIcons 
-            name="check-circle-outline" 
-            size={60} 
-            color={colors.neonGreen} 
+            name="check-circle" 
+            size={48} 
+            color={COLORS.neonGreen} 
           />
-          <Text style={[styles.completionText, {color: colors.textPrimary}]}>
+          <Text style={styles.completionText}>
             Great job! You've completed the words exercise.
           </Text>
-          <TouchableOpacity 
-            style={[styles.nextSectionButton, {backgroundColor: colors.neonPurple}]}
-            onPress={() => setActiveTab('sentences')}
-          >
-            <Text style={[styles.nextSectionButtonText, {color: colors.textPrimary}]}>
-              Continue to Sentences
-            </Text>
-            <MaterialCommunityIcons 
-              name="arrow-right" 
-              size={20} 
-              color={colors.textPrimary}
-            />
-          </TouchableOpacity>
-        </Animated.View>
+        </View>
       );
     }
     
     return (
       <View style={styles.practiceContainer}>
-        <View style={[styles.progressBarContainer, {backgroundColor: 'rgba(255,255,255,0.1)'}]}>
-          <View 
-            style={[
-              styles.progressBar, 
-              {
-                width: `${(wordsCompleted / PRACTICE_DATA.words.length) * 100}%`,
-                backgroundColor: colors.neonBlue
-              }
-            ]} 
-          />
-        </View>
-        <Text style={[styles.progressText, {color: colors.textSecondary}]}>
-          {wordsCompleted} / {PRACTICE_DATA.words.length} Words
+        <Text style={styles.progressText}>
+          Words Completed: {wordsCompleted} / {PRACTICE_DATA.words.length}
         </Text>
         
-        <Animated.View 
-          style={[styles.contentCard, {backgroundColor: 'rgba(255,255,255,0.08)'}]}
-          entering={FadeInDown.duration(300)}
-          key={currentWordIndex}
-        >
-          <Text style={[styles.practiceText, {color: colors.textPrimary}]}>
-            {currentWord.text}
-          </Text>
+        <View style={styles.contentCard}>
+          <Text style={styles.practiceText}>{currentWord.text}</Text>
           <TouchableOpacity 
             style={styles.audioButton}
             onPress={playReference}
           >
             <MaterialCommunityIcons 
               name="volume-high" 
-              size={24} 
-              color={colors.neonBlue} 
+              size={20} 
+              color={COLORS.neonBlue} 
             />
           </TouchableOpacity>
-        </Animated.View>
+        </View>
         
-        <View style={[styles.visualizerContainer, {backgroundColor: 'rgba(255,255,255,0.05)'}]}>
-          {isRecording ? (
+        <View style={styles.visualizerContainer}>
+          {isRecording && (
             <View style={styles.waveContainer}>
-              {[...Array(12)].map((_, i) => (
-                <Animated.View 
-                  key={i} 
-                  style={[
-                    styles.waveBar, 
-                    {
-                      height: 10 + Math.random() * 30,
-                      backgroundColor: colors.neonPurple
-                    }
-                  ]} 
-                />
+              {[...Array(8)].map((_, i) => (
+                <View key={i} style={styles.waveBar} />
               ))}
             </View>
-          ) : (
-            <Text style={[styles.visualizerPlaceholder, {color: colors.textSecondary}]}>
-              {sound ? "Recording saved. Tap the mic to record again." : "Tap the mic button to start recording"}
-            </Text>
           )}
         </View>
         
         <View style={styles.controlsContainer}>
-          {sound && !isRecording && (
-            <TouchableOpacity 
-              style={[styles.playButton, {backgroundColor: 'rgba(255,255,255,0.1)'}]}
-              onPress={playRecording}
-              disabled={isPlaying}
-            >
-              <MaterialCommunityIcons 
-                name={isPlaying ? "pause" : "play"} 
-                size={28} 
-                color={colors.textPrimary} 
-              />
-            </TouchableOpacity>
-          )}
-          
           {!isRecording ? (
             <TouchableOpacity 
-              style={[styles.recordButton, {
-                backgroundColor: sound ? 'rgba(255,255,255,0.15)' : colors.neonBlue
-              }]}
+              style={styles.recordButton}
               onPress={startRecording}
             >
               <MaterialCommunityIcons 
                 name="microphone" 
                 size={28} 
-                color={colors.textPrimary} 
+                color={COLORS.textPrimary} 
               />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity 
-              style={[styles.recordButton, styles.stopButton, {backgroundColor: colors.neonOrange}]}
+              style={[styles.recordButton, styles.stopButton]}
               onPress={stopRecording}
             >
               <MaterialCommunityIcons 
                 name="stop" 
                 size={28} 
-                color={colors.textPrimary} 
+                color={COLORS.textPrimary} 
               />
             </TouchableOpacity>
           )}
           
           <TouchableOpacity 
-            style={[styles.navigationButton, {
-              backgroundColor: sound ? colors.neonBlue : 'rgba(255,255,255,0.1)',
-              opacity: sound ? 1 : 0.5
-            }]}
+            style={styles.navigationButton}
             onPress={handleNext}
-            disabled={!sound}
           >
-            <Text style={[styles.navigationButtonText, {color: colors.textPrimary}]}>Next</Text>
+            <Text style={styles.navigationButtonText}>Next</Text>
             <MaterialCommunityIcons 
               name="arrow-right" 
-              size={22} 
-              color={colors.textPrimary} 
+              size={20} 
+              color={COLORS.textPrimary} 
             />
           </TouchableOpacity>
         </View>
@@ -403,149 +330,83 @@ export default function LanguageAttemptScreen() {
     
     if (isAllCompleted) {
       return (
-        <Animated.View 
-          style={styles.completionContainer}
-          entering={FadeIn.duration(500)}
-        >
+        <View style={styles.completionContainer}>
           <MaterialCommunityIcons 
-            name="check-circle-outline" 
-            size={60} 
-            color={colors.neonGreen} 
+            name="check-circle" 
+            size={48} 
+            color={COLORS.neonGreen} 
           />
-          <Text style={[styles.completionText, {color: colors.textPrimary}]}>
+          <Text style={styles.completionText}>
             Great job! You've completed the sentence exercise.
           </Text>
-          <TouchableOpacity 
-            style={[styles.nextSectionButton, {backgroundColor: colors.neonPurple}]}
-            onPress={() => setActiveTab('paragraphs')}
-          >
-            <Text style={[styles.nextSectionButtonText, {color: colors.textPrimary}]}>
-              Continue to Paragraphs
-            </Text>
-            <MaterialCommunityIcons 
-              name="arrow-right" 
-              size={20} 
-              color={colors.textPrimary}
-            />
-          </TouchableOpacity>
-        </Animated.View>
+        </View>
       );
     }
     
     return (
       <View style={styles.practiceContainer}>
-        <View style={[styles.progressBarContainer, {backgroundColor: 'rgba(255,255,255,0.1)'}]}>
-          <View 
-            style={[
-              styles.progressBar, 
-              {
-                width: `${(sentencesCompleted / PRACTICE_DATA.sentences.length) * 100}%`,
-                backgroundColor: colors.neonBlue
-              }
-            ]} 
-          />
-        </View>
-        <Text style={[styles.progressText, {color: colors.textSecondary}]}>
-          {sentencesCompleted} / {PRACTICE_DATA.sentences.length} Sentences
+        <Text style={styles.progressText}>
+          Sentences Completed: {sentencesCompleted} / {PRACTICE_DATA.sentences.length}
         </Text>
         
-        <Animated.View 
-          style={[styles.contentCard, {backgroundColor: 'rgba(255,255,255,0.08)'}]}
-          entering={FadeInDown.duration(300)}
-          key={currentSentenceIndex}
-        >
-          <Text style={[styles.practiceText, {color: colors.textPrimary}]}>
-            {currentSentence.text}
-          </Text>
+        <View style={styles.contentCard}>
+          <Text style={styles.practiceText}>{currentSentence.text}</Text>
           <TouchableOpacity 
             style={styles.audioButton}
             onPress={playReference}
           >
             <MaterialCommunityIcons 
               name="volume-high" 
-              size={24} 
-              color={colors.neonBlue} 
+              size={20} 
+              color={COLORS.neonBlue} 
             />
           </TouchableOpacity>
-        </Animated.View>
+        </View>
         
-        <View style={[styles.visualizerContainer, {backgroundColor: 'rgba(255,255,255,0.05)'}]}>
-          {isRecording ? (
+        <View style={styles.visualizerContainer}>
+          {isRecording && (
             <View style={styles.waveContainer}>
-              {[...Array(12)].map((_, i) => (
-                <Animated.View 
-                  key={i} 
-                  style={[
-                    styles.waveBar, 
-                    {
-                      height: 10 + Math.random() * 30,
-                      backgroundColor: colors.neonPurple
-                    }
-                  ]} 
-                />
+              {[...Array(8)].map((_, i) => (
+                <View key={i} style={styles.waveBar} />
               ))}
             </View>
-          ) : (
-            <Text style={[styles.visualizerPlaceholder, {color: colors.textSecondary}]}>
-              {sound ? "Recording saved. Tap the mic to record again." : "Tap the mic button to start recording"}
-            </Text>
           )}
         </View>
         
         <View style={styles.controlsContainer}>
-          {sound && !isRecording && (
-            <TouchableOpacity 
-              style={[styles.playButton, {backgroundColor: 'rgba(255,255,255,0.1)'}]}
-              onPress={playRecording}
-              disabled={isPlaying}
-            >
-              <MaterialCommunityIcons 
-                name={isPlaying ? "pause" : "play"} 
-                size={28} 
-                color={colors.textPrimary} 
-              />
-            </TouchableOpacity>
-          )}
-          
           {!isRecording ? (
             <TouchableOpacity 
-              style={[styles.recordButton, {
-                backgroundColor: sound ? 'rgba(255,255,255,0.15)' : colors.neonBlue
-              }]}
+              style={styles.recordButton}
               onPress={startRecording}
             >
               <MaterialCommunityIcons 
                 name="microphone" 
                 size={28} 
-                color={colors.textPrimary} 
+                color={COLORS.textPrimary} 
               />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity 
-              style={[styles.recordButton, styles.stopButton, {backgroundColor: colors.neonOrange}]}
+              style={[styles.recordButton, styles.stopButton]}
               onPress={stopRecording}
             >
               <MaterialCommunityIcons 
                 name="stop" 
                 size={28} 
-                color={colors.textPrimary} 
+                color={COLORS.textPrimary} 
               />
             </TouchableOpacity>
           )}
           
           <TouchableOpacity 
-            style={[styles.navigationButton, {
-              backgroundColor: sound ? colors.neonBlue : 'rgba(255,255,255,0.1)',
-              opacity: sound ? 1 : 0.5
-            }]}
+            style={styles.navigationButton}
             onPress={handleNext}
-            disabled={!sound}
           >
-            <Text style={[styles.navigationButtonText, {color: colors.textPrimary}]}>Next</Text>
+            <Text style={styles.navigationButtonText}>Next</Text>
             <MaterialCommunityIcons 
               name="arrow-right" 
-              size={22} 
-              color={colors.textPrimary} 
+              size={20} 
+              color={COLORS.textPrimary} 
             />
           </TouchableOpacity>
         </View>
@@ -559,149 +420,83 @@ export default function LanguageAttemptScreen() {
     
     if (isAllCompleted) {
       return (
-        <Animated.View 
-          style={styles.completionContainer}
-          entering={FadeIn.duration(500)}
-        >
+        <View style={styles.completionContainer}>
           <MaterialCommunityIcons 
-            name="check-circle-outline" 
-            size={60} 
-            color={colors.neonGreen} 
+            name="check-circle" 
+            size={48} 
+            color={COLORS.neonGreen} 
           />
-          <Text style={[styles.completionText, {color: colors.textPrimary}]}>
-            Great job! You've completed all exercises. Ready to view your results?
+          <Text style={styles.completionText}>
+            Great job! You've completed the paragraph exercise.
           </Text>
-          <TouchableOpacity 
-            style={[styles.nextSectionButton, {backgroundColor: colors.neonPurple}]}
-            onPress={() => setShowResults(true)}
-          >
-            <Text style={[styles.nextSectionButtonText, {color: colors.textPrimary}]}>
-              View Results
-            </Text>
-            <MaterialCommunityIcons 
-              name="chart-bar" 
-              size={20} 
-              color={colors.textPrimary}
-            />
-          </TouchableOpacity>
-        </Animated.View>
+        </View>
       );
     }
     
     return (
       <View style={styles.practiceContainer}>
-        <View style={[styles.progressBarContainer, {backgroundColor: 'rgba(255,255,255,0.1)'}]}>
-          <View 
-            style={[
-              styles.progressBar, 
-              {
-                width: `${(paragraphsCompleted / PRACTICE_DATA.paragraphs.length) * 100}%`,
-                backgroundColor: colors.neonBlue
-              }
-            ]} 
-          />
-        </View>
-        <Text style={[styles.progressText, {color: colors.textSecondary}]}>
-          {paragraphsCompleted} / {PRACTICE_DATA.paragraphs.length} Paragraphs
+        <Text style={styles.progressText}>
+          Paragraphs Completed: {paragraphsCompleted} / {PRACTICE_DATA.paragraphs.length}
         </Text>
         
-        <Animated.View 
-          style={[styles.contentCard, {backgroundColor: 'rgba(255,255,255,0.08)'}]}
-          entering={FadeInDown.duration(300)}
-          key={currentParagraphIndex}
-        >
-          <Text style={[styles.practiceText, {color: colors.textPrimary}]}>
-            {currentParagraph.text}
-          </Text>
+        <View style={styles.contentCard}>
+          <Text style={styles.practiceText}>{currentParagraph.text}</Text>
           <TouchableOpacity 
             style={styles.audioButton}
             onPress={playReference}
           >
             <MaterialCommunityIcons 
               name="volume-high" 
-              size={24} 
-              color={colors.neonBlue} 
+              size={20} 
+              color={COLORS.neonBlue} 
             />
           </TouchableOpacity>
-        </Animated.View>
+        </View>
         
-        <View style={[styles.visualizerContainer, {backgroundColor: 'rgba(255,255,255,0.05)'}]}>
-          {isRecording ? (
+        <View style={styles.visualizerContainer}>
+          {isRecording && (
             <View style={styles.waveContainer}>
-              {[...Array(12)].map((_, i) => (
-                <Animated.View 
-                  key={i} 
-                  style={[
-                    styles.waveBar, 
-                    {
-                      height: 10 + Math.random() * 30,
-                      backgroundColor: colors.neonPurple
-                    }
-                  ]} 
-                />
+              {[...Array(8)].map((_, i) => (
+                <View key={i} style={styles.waveBar} />
               ))}
             </View>
-          ) : (
-            <Text style={[styles.visualizerPlaceholder, {color: colors.textSecondary}]}>
-              {sound ? "Recording saved. Tap the mic to record again." : "Tap the mic button to start recording"}
-            </Text>
           )}
         </View>
         
         <View style={styles.controlsContainer}>
-          {sound && !isRecording && (
-            <TouchableOpacity 
-              style={[styles.playButton, {backgroundColor: 'rgba(255,255,255,0.1)'}]}
-              onPress={playRecording}
-              disabled={isPlaying}
-            >
-              <MaterialCommunityIcons 
-                name={isPlaying ? "pause" : "play"} 
-                size={28} 
-                color={colors.textPrimary} 
-              />
-            </TouchableOpacity>
-          )}
-          
           {!isRecording ? (
             <TouchableOpacity 
-              style={[styles.recordButton, {
-                backgroundColor: sound ? 'rgba(255,255,255,0.15)' : colors.neonBlue
-              }]}
+              style={styles.recordButton}
               onPress={startRecording}
             >
               <MaterialCommunityIcons 
                 name="microphone" 
                 size={28} 
-                color={colors.textPrimary} 
+                color={COLORS.textPrimary} 
               />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity 
-              style={[styles.recordButton, styles.stopButton, {backgroundColor: colors.neonOrange}]}
+              style={[styles.recordButton, styles.stopButton]}
               onPress={stopRecording}
             >
               <MaterialCommunityIcons 
                 name="stop" 
                 size={28} 
-                color={colors.textPrimary} 
+                color={COLORS.textPrimary} 
               />
             </TouchableOpacity>
           )}
           
           <TouchableOpacity 
-            style={[styles.navigationButton, {
-              backgroundColor: sound ? colors.neonBlue : 'rgba(255,255,255,0.1)',
-              opacity: sound ? 1 : 0.5
-            }]}
+            style={styles.navigationButton}
             onPress={handleNext}
-            disabled={!sound}
           >
-            <Text style={[styles.navigationButtonText, {color: colors.textPrimary}]}>Next</Text>
+            <Text style={styles.navigationButtonText}>Next</Text>
             <MaterialCommunityIcons 
               name="arrow-right" 
-              size={22} 
-              color={colors.textPrimary} 
+              size={20} 
+              color={COLORS.textPrimary} 
             />
           </TouchableOpacity>
         </View>
@@ -710,93 +505,39 @@ export default function LanguageAttemptScreen() {
   };
 
   const renderResults = () => {
-    // Calculate overall progress
-    const totalItems = PRACTICE_DATA.words.length + PRACTICE_DATA.sentences.length + PRACTICE_DATA.paragraphs.length;
-    const completedItems = wordsCompleted + sentencesCompleted + paragraphsCompleted;
-    const progress = (completedItems / totalItems) * 100;
-    
     return (
-      <Animated.View 
-        style={styles.resultsContainer}
-        entering={FadeIn.duration(500)}
-      >
-        <Text style={[styles.resultsTitle, {color: colors.textPrimary}]}>Performance Summary</Text>
-        
-        <View style={[styles.progressCircle, {borderColor: 'rgba(255,255,255,0.1)'}]}>
-          <Text style={[styles.progressCircleText, {color: colors.textPrimary}]}>
-            {scores.overall}%
-          </Text>
-          <Text style={[styles.progressCircleLabel, {color: colors.textSecondary}]}>
-            Overall Score
-          </Text>
-        </View>
+      <View style={styles.resultsContainer}>
+        <Text style={styles.resultsTitle}>Performance Summary</Text>
         
         <View style={styles.scoreCardsContainer}>
+          {/* Overall Score */}
+          <View style={styles.scoreCard}>
+            <Text style={styles.scoreCardTitle}>Overall Score</Text>
+            <Text style={styles.scoreCardValue}>{scores.overall}%</Text>
+          </View>
+          
           {/* Fluency */}
-          <View style={[styles.scoreCard, {backgroundColor: 'rgba(255,255,255,0.08)'}]}>
-            <View style={styles.scoreCardIcon}>
-              <MaterialCommunityIcons 
-                name="voice" 
-                size={24} 
-                color={getScoreColor(scores.fluency)} 
-              />
-            </View>
-            <Text style={[styles.scoreCardTitle, {color: colors.textSecondary}]}>
-              Fluency
-            </Text>
-            <Text style={[styles.scoreCardValue, {color: getScoreColor(scores.fluency)}]}>
-              {scores.fluency}%
-            </Text>
+          <View style={styles.scoreCard}>
+            <Text style={styles.scoreCardTitle}>Fluency</Text>
+            <Text style={styles.scoreCardValue}>{scores.fluency}%</Text>
           </View>
           
           {/* Accuracy */}
-          <View style={[styles.scoreCard, {backgroundColor: 'rgba(255,255,255,0.08)'}]}>
-            <View style={styles.scoreCardIcon}>
-              <MaterialCommunityIcons 
-                name="check-circle-outline" 
-                size={24} 
-                color={getScoreColor(scores.accuracy)} 
-              />
-            </View>
-            <Text style={[styles.scoreCardTitle, {color: colors.textSecondary}]}>
-              Accuracy
-            </Text>
-            <Text style={[styles.scoreCardValue, {color: getScoreColor(scores.accuracy)}]}>
-              {scores.accuracy}%
-            </Text>
+          <View style={styles.scoreCard}>
+            <Text style={styles.scoreCardTitle}>Accuracy</Text>
+            <Text style={styles.scoreCardValue}>{scores.accuracy}%</Text>
           </View>
           
           {/* Integrity */}
-          <View style={[styles.scoreCard, {backgroundColor: 'rgba(255,255,255,0.08)'}]}>
-            <View style={styles.scoreCardIcon}>
-              <MaterialCommunityIcons 
-                name="puzzle-outline" 
-                size={24} 
-                color={getScoreColor(scores.integrity)} 
-              />
-            </View>
-            <Text style={[styles.scoreCardTitle, {color: colors.textSecondary}]}>
-              Integrity
-            </Text>
-            <Text style={[styles.scoreCardValue, {color: getScoreColor(scores.integrity)}]}>
-              {scores.integrity}%
-            </Text>
+          <View style={styles.scoreCard}>
+            <Text style={styles.scoreCardTitle}>Integrity</Text>
+            <Text style={styles.scoreCardValue}>{scores.integrity}%</Text>
           </View>
-        </View>
-        
-        <View style={[styles.feedbackCard, {backgroundColor: 'rgba(255,255,255,0.05)'}]}>
-          <Text style={[styles.feedbackTitle, {color: colors.textPrimary}]}>
-            Feedback
-          </Text>
-          <Text style={[styles.feedbackText, {color: colors.textSecondary}]}>
-            Great work! Your pronunciation is clear and your rhythm is natural. 
-            Focus on maintaining consistent speed when reading longer paragraphs.
-          </Text>
         </View>
         
         <View style={styles.resultButtons}>
           <TouchableOpacity 
-            style={[styles.resultButton, styles.retryButton, {backgroundColor: 'rgba(255,255,255,0.1)'}]}
+            style={[styles.resultButton, styles.retryButton]}
             onPress={() => {
               setShowResults(false);
               setWordsCompleted(0);
@@ -812,31 +553,26 @@ export default function LanguageAttemptScreen() {
               PRACTICE_DATA.paragraphs.forEach(paragraph => paragraph.completed = false);
             }}
           >
-            <Text style={[styles.retryButtonText, {color: colors.textPrimary}]}>Try Again</Text>
+            <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
-            style={[styles.resultButton, styles.completeButton, {backgroundColor: colors.neonGreen}]}
+            style={[styles.resultButton, styles.completeButton]}
             onPress={() => {
               toast.success("Assignment completed successfully!");
               navigation.goBack();
             }}
           >
-            <Text style={[styles.completeButtonText, {color: colors.textPrimary}]}>Complete</Text>
+            <Text style={styles.completeButtonText}>Complete</Text>
           </TouchableOpacity>
         </View>
-      </Animated.View>
+      </View>
     );
   };
 
-  // Determine gradient colors based on theme
-  const gradientColors = theme === 'dark' 
-    ? [colors.deepBlue, colors.softPurple]
-    : ['#F8F9FA', '#E9ECEF'];
-
   return (
     <LinearGradient
-      colors={gradientColors}
+      colors={[COLORS.deepBlue, COLORS.softPurple]}
       style={styles.container}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -844,29 +580,18 @@ export default function LanguageAttemptScreen() {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
           <TouchableOpacity 
-            style={[styles.backButton, {backgroundColor: 'rgba(255, 255, 255, 0.1)'}]}
+            style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <MaterialCommunityIcons name="arrow-left" size={24} color={colors.textPrimary} />
+            <MaterialCommunityIcons name="arrow-left" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={[styles.headerTitle, {color: colors.textPrimary}]}>Language Practice</Text>
-          
-          {/* Theme toggle button */}
-          <TouchableOpacity 
-            style={[styles.themeButton, {backgroundColor: 'rgba(255, 255, 255, 0.1)'}]}
-            onPress={toggleTheme}
-          >
-            <MaterialCommunityIcons 
-              name={theme === 'dark' ? 'white-balance-sunny' : 'moon-waning-crescent'} 
-              size={22} 
-              color={colors.textPrimary} 
-            />
-          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Language Practice</Text>
+          <View style={styles.spacer}></View>
         </View>
         
-        <View style={[styles.titleContainer, {borderBottomColor: 'rgba(255, 255, 255, 0.1)'}]}>
-          <Text style={[styles.assignmentTitle, {color: colors.textPrimary}]}>{PRACTICE_DATA.title}</Text>
-          <Text style={[styles.assignmentDescription, {color: colors.textSecondary}]}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.assignmentTitle}>{PRACTICE_DATA.title}</Text>
+          <Text style={styles.assignmentDescription}>
             Practice pronunciation and speaking fluency
           </Text>
         </View>
@@ -875,23 +600,17 @@ export default function LanguageAttemptScreen() {
           renderResults()
         ) : (
           <View style={styles.content}>
-            <View style={[styles.tabsContainer, {borderBottomColor: 'rgba(255, 255, 255, 0.1)'}]}>
+            <View style={styles.tabsContainer}>
               <TouchableOpacity 
                 style={[
                   styles.tabButton, 
-                  {backgroundColor: activeTab === 'words' 
-                    ? colors.neonBlue 
-                    : 'rgba(255, 255, 255, 0.1)'
-                  }
+                  activeTab === 'words' && styles.activeTabButton
                 ]}
                 onPress={() => setActiveTab('words')}
               >
                 <Text style={[
                   styles.tabButtonText,
-                  {color: activeTab === 'words' 
-                    ? colors.textPrimary 
-                    : colors.textSecondary
-                  }
+                  activeTab === 'words' && styles.activeTabButtonText
                 ]}>
                   Words
                 </Text>
@@ -900,19 +619,13 @@ export default function LanguageAttemptScreen() {
               <TouchableOpacity 
                 style={[
                   styles.tabButton, 
-                  {backgroundColor: activeTab === 'sentences' 
-                    ? colors.neonBlue 
-                    : 'rgba(255, 255, 255, 0.1)'
-                  }
+                  activeTab === 'sentences' && styles.activeTabButton
                 ]}
                 onPress={() => setActiveTab('sentences')}
               >
                 <Text style={[
                   styles.tabButtonText,
-                  {color: activeTab === 'sentences' 
-                    ? colors.textPrimary 
-                    : colors.textSecondary
-                  }
+                  activeTab === 'sentences' && styles.activeTabButtonText
                 ]}>
                   Sentences
                 </Text>
@@ -921,19 +634,13 @@ export default function LanguageAttemptScreen() {
               <TouchableOpacity 
                 style={[
                   styles.tabButton, 
-                  {backgroundColor: activeTab === 'paragraphs' 
-                    ? colors.neonBlue 
-                    : 'rgba(255, 255, 255, 0.1)'
-                  }
+                  activeTab === 'paragraphs' && styles.activeTabButton
                 ]}
                 onPress={() => setActiveTab('paragraphs')}
               >
                 <Text style={[
                   styles.tabButtonText,
-                  {color: activeTab === 'paragraphs' 
-                    ? colors.textPrimary 
-                    : colors.textSecondary
-                  }
+                  activeTab === 'paragraphs' && styles.activeTabButtonText
                 ]}>
                   Paragraphs
                 </Text>
@@ -955,3 +662,248 @@ export default function LanguageAttemptScreen() {
     </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === 'ios' ? 10 : 40,
+    paddingBottom: 10,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  spacer: {
+    width: 40,
+  },
+  titleContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  assignmentTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 5,
+  },
+  assignmentDescription: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  content: {
+    flex: 1,
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  tabButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  activeTabButton: {
+    backgroundColor: COLORS.neonBlue,
+  },
+  tabButtonText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  activeTabButtonText: {
+    color: COLORS.textPrimary,
+  },
+  tabContent: {
+    flex: 1,
+  },
+  tabContentContainer: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  progressText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  practiceContainer: {
+    flex: 1,
+  },
+  contentCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  practiceText: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    lineHeight: 26,
+    flex: 1,
+  },
+  audioButton: {
+    marginLeft: 10,
+    padding: 5,
+  },
+  visualizerContainer: {
+    height: 60,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 8,
+    marginBottom: 20,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  waveContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    gap: 4,
+  },
+  waveBar: {
+    width: 4,
+    height: 20,
+    backgroundColor: COLORS.neonBlue,
+    borderRadius: 2,
+    marginHorizontal: 2,
+  },
+  controlsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  recordButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.neonBlue,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 20,
+  },
+  stopButton: {
+    backgroundColor: COLORS.neonOrange,
+  },
+  navigationButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  navigationButtonText: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 5,
+  },
+  completionContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  completionText: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 15,
+  },
+  // Results styles
+  resultsContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  resultsTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 22,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  scoreCardsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 30,
+  },
+  scoreCard: {
+    width: '48%',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 10,
+    padding: 15,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  scoreCardTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    marginBottom: 10,
+  },
+  scoreCardValue: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  resultButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 'auto',
+  },
+  resultButton: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  retryButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginRight: 10,
+  },
+  retryButtonText: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  completeButton: {
+    backgroundColor: COLORS.neonGreen,
+    marginLeft: 10,
+  },
+  completeButtonText: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
