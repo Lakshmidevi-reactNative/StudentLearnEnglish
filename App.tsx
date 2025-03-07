@@ -56,6 +56,7 @@ import TypeEngScreen from "./MainScreeens/learning/TypeEngScreen";
 import PromptEngScreen from "./MainScreeens/learning/PromptEngScreen";
 
 import ClassesScreen from "./MainScreeens/ClassesScreen";
+import ContentListTemplate from "./MainScreeens/learning/ContentListTemplate";
 
 function PremiumScreen() {
 	return <CommonScreen title="Premium" />;
@@ -152,12 +153,14 @@ function DrawerNavigator() {
 function RootStack() {
 	return (
 		<Stack.Navigator
+		    initialRouteName="Contents"
 			screenOptions={{
 				headerShown: false,
 			}}
 		>
 			<Stack.Screen name="Main" component={DrawerNavigator} />
 			<Stack.Screen name="ListenEng" component={ListenEngScreen} />
+			<Stack.Screen name="Contents" component={ContentListTemplate} />
 			<Stack.Screen name="SpeakEng" component={SpeakEngScreen} />
 			<Stack.Screen name="ReadEng" component={ReadEngScreen} />
 			<Stack.Screen name="WriteEng" component={WriteEngScreen} />
