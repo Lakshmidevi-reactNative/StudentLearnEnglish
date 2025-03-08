@@ -37,7 +37,10 @@ const LearnStack = createNativeStackNavigator();
 const AuthStack = createNativeStackNavigator();
 
 // Placeholder screens with common gradient background
-const CommonScreen = ({ title, subtitle = "Coming soon..." }) => {
+const CommonScreen: React.FC<{ title: string; subtitle?: string }> = ({
+	title,
+	subtitle = "Coming soon...",
+}) => {
 	const { colors } = useTheme();
 
 	return (
@@ -115,11 +118,7 @@ function TabNavigator() {
 			<Tab.Screen name="Home" component={HomeScreen} />
 			<Tab.Screen name="Learn" component={LearnStackNavigator} />
 			<Tab.Screen name="Classes" component={ClassesScreen} />
-			<Tab.Screen
-				name="Resources"
-				component={ResourcesScreen}
-				options={{ unmountOnBlur: true }}
-			/>
+			<Tab.Screen name="Resources" component={ResourcesScreen} options={{}} />
 		</Tab.Navigator>
 	);
 }

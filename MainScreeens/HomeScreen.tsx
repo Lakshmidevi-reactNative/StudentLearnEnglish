@@ -18,7 +18,12 @@ import {
 	MaterialIcons,
 } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { useNavigation, DrawerActions } from "@react-navigation/native";
+import {
+	useNavigation,
+	DrawerActions,
+	NavigationProp,
+} from "@react-navigation/native";
+import { RootStackParamList } from "../types"; // Adjust the import path as necessary
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useTheme } from "./constants/ThemeContext";
@@ -29,7 +34,7 @@ const { width } = Dimensions.get("window");
 export default function HomeScreen() {
 	// activeTab state is now handled by the tab navigator
 	const [greeting, setGreeting] = useState("");
-	const navigation = useNavigation();
+	const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 	const { colors, theme } = useTheme();
 
 	useEffect(() => {
@@ -100,9 +105,10 @@ export default function HomeScreen() {
 		backgroundGradientFrom: "transparent",
 		backgroundGradientTo: "transparent",
 		decimalPlaces: 0,
-		color: (opacity = 1) => theme === 'dark' 
-			? `rgba(255, 255, 255, ${opacity})` 
-			: `rgba(0, 0, 0, ${opacity})`,
+		color: (opacity = 1) =>
+			theme === "dark"
+				? `rgba(255, 255, 255, ${opacity})`
+				: `rgba(0, 0, 0, ${opacity})`,
 		labelColor: (opacity = 1) => colors.textPrimary,
 		style: {
 			borderRadius: 16,
@@ -113,7 +119,7 @@ export default function HomeScreen() {
 			stroke: colors.neonPurple,
 		},
 	};
-	
+
 	const onMenuPress = () => {
 		// Using dispatch with DrawerActions is more reliable
 		navigation.dispatch(DrawerActions.openDrawer());
@@ -127,22 +133,40 @@ export default function HomeScreen() {
 			end={{ x: 1, y: 1 }}
 		>
 			<StatusBar
-				barStyle={theme === 'dark' ? "light-content" : "dark-content"}
+				barStyle={theme === "dark" ? "light-content" : "dark-content"}
 				translucent
 				backgroundColor="transparent"
 			/>
 			<SafeAreaView style={styles.safeArea}>
 				<View style={styles.header}>
-					<TouchableOpacity onPress={onMenuPress} style={[styles.menuButton, {backgroundColor: theme === 'dark' ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)"}]}>
+					<TouchableOpacity
+						onPress={onMenuPress}
+						style={[
+							styles.menuButton,
+							{
+								backgroundColor:
+									theme === "dark"
+										? "rgba(255, 255, 255, 0.1)"
+										: "rgba(0, 0, 0, 0.05)",
+							},
+						]}
+					>
 						<MaterialIcons
 							name="menu"
 							size={28}
 							color={colors.textPrimary}
-							style={[styles.glowIcon, {textShadowColor: colors.neonBlue}]}
+							style={[styles.glowIcon, { textShadowColor: colors.neonBlue }]}
 						/>
 					</TouchableOpacity>
 					<View style={styles.headerCenter}>
-						<Text style={[styles.appTitle, {color: colors.textPrimary, textShadowColor: colors.neonBlue}]}>LearnEng</Text>
+						<Text
+							style={[
+								styles.appTitle,
+								{ color: colors.textPrimary, textShadowColor: colors.neonBlue },
+							]}
+						>
+							LearnEng
+						</Text>
 					</View>
 					<TouchableOpacity
 						style={styles.profileButton}
@@ -152,26 +176,50 @@ export default function HomeScreen() {
 							source={{
 								uri: "https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20female%20student%20with%20a%20friendly%20smile&aspect=1:1&seed=123",
 							}}
-							style={[styles.profileImage, {borderColor: colors.neonPurple}]}
+							style={[styles.profileImage, { borderColor: colors.neonPurple }]}
 						/>
-						<View style={[styles.notificationBadge, {backgroundColor: colors.neonBlue, borderColor: colors.deepBlue}]} />
+						<View
+							style={[
+								styles.notificationBadge,
+								{
+									backgroundColor: colors.neonBlue,
+									borderColor: colors.deepBlue,
+								},
+							]}
+						/>
 					</TouchableOpacity>
 				</View>
 				<ScrollView showsVerticalScrollIndicator={false} style={styles.content}>
 					<Animated.View entering={FadeInDown.delay(100).duration(600)}>
 						<View style={styles.userInfoSection}>
 							<View>
-								<Text style={[styles.greeting, {color: colors.textSecondary}]}>{greeting},</Text>
-								<Text style={[styles.userName, {color: colors.textPrimary}]}>Sarah</Text>
+								<Text
+									style={[styles.greeting, { color: colors.textSecondary }]}
+								>
+									{greeting},
+								</Text>
+								<Text style={[styles.userName, { color: colors.textPrimary }]}>
+									Sarah
+								</Text>
 							</View>
-							<View style={[
-								styles.levelBadge, 
-								{
-									backgroundColor: theme === 'dark' ? "rgba(57, 255, 20, 0.2)" : "rgba(57, 255, 20, 0.1)",
-									borderColor: theme === 'dark' ? "rgba(57, 255, 20, 0.5)" : "rgba(57, 255, 20, 0.3)"
-								}
-							]}>
-								<Text style={[styles.levelText, {color: colors.neonGreen}]}>Beginner</Text>
+							<View
+								style={[
+									styles.levelBadge,
+									{
+										backgroundColor:
+											theme === "dark"
+												? "rgba(57, 255, 20, 0.2)"
+												: "rgba(57, 255, 20, 0.1)",
+										borderColor:
+											theme === "dark"
+												? "rgba(57, 255, 20, 0.5)"
+												: "rgba(57, 255, 20, 0.3)",
+									},
+								]}
+							>
+								<Text style={[styles.levelText, { color: colors.neonGreen }]}>
+									Beginner
+								</Text>
 							</View>
 						</View>
 					</Animated.View>
@@ -179,27 +227,53 @@ export default function HomeScreen() {
 					<Animated.View entering={FadeInDown.delay(200).duration(600)}>
 						<View style={styles.featuredCard}>
 							<LinearGradient
-								colors={theme === 'dark' 
-									? ["rgba(176, 38, 255, 0.2)", "rgba(0, 180, 255, 0.2)"]
-									: ["rgba(176, 38, 255, 0.1)", "rgba(0, 133, 204, 0.1)"]}
-								style={[styles.featuredGradient, {borderColor: colors.cardBorder}]}
+								colors={
+									theme === "dark"
+										? ["rgba(176, 38, 255, 0.2)", "rgba(0, 180, 255, 0.2)"]
+										: ["rgba(176, 38, 255, 0.1)", "rgba(0, 133, 204, 0.1)"]
+								}
+								style={[
+									styles.featuredGradient,
+									{ borderColor: colors.cardBorder },
+								]}
 								start={{ x: 0, y: 0 }}
 								end={{ x: 1, y: 1 }}
 							>
 								<View style={styles.featuredContent}>
 									<View style={styles.featuredTextContainer}>
-										<Text style={[styles.featuredTitle, {color: colors.textPrimary}]}>Daily Challenge</Text>
-										<Text style={[styles.featuredSubtitle, {color: colors.textSecondary}]}>
+										<Text
+											style={[
+												styles.featuredTitle,
+												{ color: colors.textPrimary },
+											]}
+										>
+											Daily Challenge
+										</Text>
+										<Text
+											style={[
+												styles.featuredSubtitle,
+												{ color: colors.textSecondary },
+											]}
+										>
 											Complete today's learning goal and earn bonus points
 										</Text>
-										<TouchableOpacity style={[
-											styles.featuredButton, 
-											{
-												backgroundColor: colors.neonBlue,
-												shadowColor: colors.neonBlue
-											}
-										]}>
-											<Text style={[styles.featuredButtonText, {color: theme === 'dark' ? '#FFFFFF' : '#FFFFFF'}]}>Start Now</Text>
+										<TouchableOpacity
+											style={[
+												styles.featuredButton,
+												{
+													backgroundColor: colors.neonBlue,
+													shadowColor: colors.neonBlue,
+												},
+											]}
+										>
+											<Text
+												style={[
+													styles.featuredButtonText,
+													{ color: theme === "dark" ? "#FFFFFF" : "#FFFFFF" },
+												]}
+											>
+												Start Now
+											</Text>
 										</TouchableOpacity>
 									</View>
 									<View style={styles.featuredImageContainer}>
@@ -216,21 +290,27 @@ export default function HomeScreen() {
 					</Animated.View>
 
 					<Animated.View entering={FadeInDown.delay(300).duration(600)}>
-						<Text style={[styles.sectionTitle, {color: colors.textPrimary}]}>Learning Activities</Text>
+						<Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+							Learning Activities
+						</Text>
 
 						{/* Pass theme to the carousel if needed */}
 						<LearningActivitiesCarousel />
 					</Animated.View>
 
 					<Animated.View entering={FadeInDown.delay(400).duration(600)}>
-						<Text style={[styles.sectionTitle, {color: colors.textPrimary}]}>Weekly Performance</Text>
-						<View style={[
-							styles.chartCard, 
-							{
-								backgroundColor: colors.cardBg,
-								borderColor: colors.cardBorder
-							}
-						]}>
+						<Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+							Weekly Performance
+						</Text>
+						<View
+							style={[
+								styles.chartCard,
+								{
+									backgroundColor: colors.cardBg,
+									borderColor: colors.cardBorder,
+								},
+							]}
+						>
 							<LineChart
 								data={performanceData}
 								width={width - 40}
@@ -243,14 +323,18 @@ export default function HomeScreen() {
 					</Animated.View>
 
 					<Animated.View entering={FadeInDown.delay(500).duration(600)}>
-						<Text style={[styles.sectionTitle, {color: colors.textPrimary}]}>Skill Breakdown</Text>
-						<View style={[
-							styles.chartCard, 
-							{
-								backgroundColor: colors.cardBg,
-								borderColor: colors.cardBorder
-							}
-						]}>
+						<Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+							Skill Breakdown
+						</Text>
+						<View
+							style={[
+								styles.chartCard,
+								{
+									backgroundColor: colors.cardBg,
+									borderColor: colors.cardBorder,
+								},
+							]}
+						>
 							<BarChart
 								data={skillData}
 								width={width - 40}
@@ -258,20 +342,25 @@ export default function HomeScreen() {
 								chartConfig={chartConfig}
 								style={styles.chart}
 								yAxisSuffix="%"
+								yAxisLabel=""
 								fromZero
 							/>
 						</View>
 					</Animated.View>
 
 					<Animated.View entering={FadeInDown.delay(600).duration(600)}>
-						<Text style={[styles.sectionTitle, {color: colors.textPrimary}]}>Typing Performance</Text>
-						<View style={[
-							styles.chartCard, 
-							{
-								backgroundColor: colors.cardBg,
-								borderColor: colors.cardBorder
-							}
-						]}>
+						<Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+							Typing Performance
+						</Text>
+						<View
+							style={[
+								styles.chartCard,
+								{
+									backgroundColor: colors.cardBg,
+									borderColor: colors.cardBorder,
+								},
+							]}
+						>
 							<PieChart
 								data={pieData}
 								width={width - 40}
@@ -287,15 +376,19 @@ export default function HomeScreen() {
 					</Animated.View>
 
 					<Animated.View entering={FadeInDown.delay(700).duration(600)}>
-						<Text style={[styles.sectionTitle, {color: colors.textPrimary}]}>Recommended Lessons</Text>
+						<Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+							Recommended Lessons
+						</Text>
 
-						<View style={[
-							styles.recommendedCard, 
-							{
-								backgroundColor: colors.cardBg,
-								borderColor: colors.cardBorder
-							}
-						]}>
+						<View
+							style={[
+								styles.recommendedCard,
+								{
+									backgroundColor: colors.cardBg,
+									borderColor: colors.cardBorder,
+								},
+							]}
+						>
 							<Image
 								source={{
 									uri: "https://api.a0.dev/assets/image?text=english%20language%20conversation%20practice%20scene&aspect=16:9&seed=789",
@@ -303,10 +396,20 @@ export default function HomeScreen() {
 								style={styles.recommendedImage}
 							/>
 							<View style={styles.recommendedContent}>
-								<Text style={[styles.recommendedTitle, {color: colors.textPrimary}]}>
+								<Text
+									style={[
+										styles.recommendedTitle,
+										{ color: colors.textPrimary },
+									]}
+								>
 									Essential Conversations
 								</Text>
-								<Text style={[styles.recommendedSubtitle, {color: colors.textSecondary}]}>
+								<Text
+									style={[
+										styles.recommendedSubtitle,
+										{ color: colors.textSecondary },
+									]}
+								>
 									Learn everyday English phrases and expressions
 								</Text>
 								<View style={styles.recommendedMeta}>
@@ -315,18 +418,27 @@ export default function HomeScreen() {
 										size={14}
 										color={colors.textSecondary}
 									/>
-									<Text style={[styles.recommendedMetaText, {color: colors.textSecondary}]}>15 min lesson</Text>
+									<Text
+										style={[
+											styles.recommendedMetaText,
+											{ color: colors.textSecondary },
+										]}
+									>
+										15 min lesson
+									</Text>
 								</View>
 							</View>
 						</View>
 
-						<View style={[
-							styles.recommendedCard, 
-							{
-								backgroundColor: colors.cardBg,
-								borderColor: colors.cardBorder
-							}
-						]}>
+						<View
+							style={[
+								styles.recommendedCard,
+								{
+									backgroundColor: colors.cardBg,
+									borderColor: colors.cardBorder,
+								},
+							]}
+						>
 							<Image
 								source={{
 									uri: "https://api.a0.dev/assets/image?text=english%20language%20vocabulary%20practice&aspect=16:9&seed=790",
@@ -334,8 +446,20 @@ export default function HomeScreen() {
 								style={styles.recommendedImage}
 							/>
 							<View style={styles.recommendedContent}>
-								<Text style={[styles.recommendedTitle, {color: colors.textPrimary}]}>Vocabulary Builder</Text>
-								<Text style={[styles.recommendedSubtitle, {color: colors.textSecondary}]}>
+								<Text
+									style={[
+										styles.recommendedTitle,
+										{ color: colors.textPrimary },
+									]}
+								>
+									Vocabulary Builder
+								</Text>
+								<Text
+									style={[
+										styles.recommendedSubtitle,
+										{ color: colors.textSecondary },
+									]}
+								>
 									Expand your word knowledge with interactive exercises
 								</Text>
 								<View style={styles.recommendedMeta}>
@@ -344,7 +468,14 @@ export default function HomeScreen() {
 										size={14}
 										color={colors.textSecondary}
 									/>
-									<Text style={[styles.recommendedMetaText, {color: colors.textSecondary}]}>10 min lesson</Text>
+									<Text
+										style={[
+											styles.recommendedMetaText,
+											{ color: colors.textSecondary },
+										]}
+									>
+										10 min lesson
+									</Text>
 								</View>
 							</View>
 						</View>
