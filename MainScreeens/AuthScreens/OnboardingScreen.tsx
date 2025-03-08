@@ -168,7 +168,14 @@ const USER_REVIEWS = [
 	},
 ];
 
-const OnboardingScreen = ({ navigation, route }) => {
+import { NavigationProp, RouteProp } from "@react-navigation/native";
+
+type OnboardingScreenProps = {
+	navigation: NavigationProp<any>;
+	route: RouteProp<any>;
+};
+
+const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 	const { theme, colors } = useTheme();
 	const isDarkMode = theme === "dark";
 	const authColors = getAuthColors(isDarkMode);
@@ -188,10 +195,10 @@ const OnboardingScreen = ({ navigation, route }) => {
 
 	const [motherTongue, setMotherTongue] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedLevel, setSelectedLevel] = useState(null);
-	const [selectedGoals, setSelectedGoals] = useState([]);
-	const [educationLevel, setEducationLevel] = useState(null);
-	const [selectedRegion, setSelectedRegion] = useState(null);
+	const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+	const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
+	const [educationLevel, setEducationLevel] = useState<string | null>(null);
+	const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 	const flatListRef = useRef(null);
 
 	// Filter languages based on search query
@@ -200,7 +207,7 @@ const OnboardingScreen = ({ navigation, route }) => {
 	);
 
 	// Toggle goal selection
-	const toggleGoal = (goalId) => {
+	const toggleGoal = (goalId: string) => {
 		if (selectedGoals.includes(goalId)) {
 			setSelectedGoals(selectedGoals.filter((id) => id !== goalId));
 		} else {
@@ -253,7 +260,7 @@ const OnboardingScreen = ({ navigation, route }) => {
 			setCurrentPhaseIndex(currentPhaseIndex + 1);
 		} else {
 			// Last phase - go to main app
-			navigation.replace("Main");
+			navigation.navigate("Main");
 		}
 	};
 
@@ -266,7 +273,7 @@ const OnboardingScreen = ({ navigation, route }) => {
 
 	const handleSkip = () => {
 		// Skip onboarding and go directly to main app
-		navigation.replace("Main");
+		navigation.navigate("Main");
 	};
 
 	// Render welcome phase
@@ -516,7 +523,7 @@ const OnboardingScreen = ({ navigation, route }) => {
 									: { backgroundColor: authColors.divider },
 							]}
 						>
-							<Ionicons name={goal.icon} size={24} color="#FFFFFF" />
+							<Ionicons name={goal.icon as any} size={24} color="#FFFFFF" />
 						</View>
 						<Text
 							style={[
@@ -833,7 +840,7 @@ const OnboardingScreen = ({ navigation, route }) => {
 					styles.finishButton,
 					{ backgroundColor: authColors.primaryButton },
 				]}
-				onPress={() => navigation.replace("Main")}
+				onPress={() => navigation.navigate("Main")}
 			>
 				<Text style={styles.finishButtonText}>Let's Go!</Text>
 				<Ionicons
@@ -848,7 +855,7 @@ const OnboardingScreen = ({ navigation, route }) => {
 
 	// ===== IMPORTANT CHANGES BEGIN =====
 	// Map of phase indexes to render functions
-	const phaseRenderers = {
+	const phaseRenderers: { [key: number]: () => JSX.Element } = {
 		0: renderWelcome,
 		1: renderMotherTongue,
 		2: renderEnglishLevel,
@@ -863,7 +870,7 @@ const OnboardingScreen = ({ navigation, route }) => {
 	// Instead of rendering based on phases array, render the current screen directly
 	const renderCurrentScreen = () => {
 		// Get the render function for the current screen
-		const renderFunction = phaseRenderers[currentScreen];
+		const renderFunction = phaseRenderers[currentScreen as number];
 		return renderFunction ? renderFunction() : null;
 	};
 
