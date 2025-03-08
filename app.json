@@ -1,46 +1,29 @@
 {
   "expo": {
-    "name": "LearnEng_student_application",
-    "slug": "snack-810e2534-c266-4944-9d49-3937b80534f4",
+    "name": "a0-project",
+    "slug": "snack-f8ff2106-2b57-4877-b4a1-e2d590e010cc",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#4A90E2"
+      "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.aditya789.learnengstudent",
-      "buildNumber": "1.0.0",
-      "infoPlist": {
-        "NSCameraUsageDescription": "We need access to your camera for certain features.",
-        "NSLocationWhenInUseUsageDescription": "We need your location for location-based features.",
-        "ITSAppUsesNonExemptEncryption": false
-      }
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#ffffff",
-        "permissions": [
-          "INTERNET"
-        ]
-      },
-      "package": "com.aditya789.snack810e2534c26649449d493937b80534f4"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
     },
     "web": {
-      "favicon": "./assets/icon.png"
+      "favicon": "./assets/favicon.png"
     },
-    "description": "Learn English with an interactive mobile application",
-    "extra": {
-      "eas": {
-        "projectId": "43bcbc3b-71bc-4ffc-ae8e-500892d1e667"
-      }
-    }
+    "description": "Quickly generate React Native components with AI"
   }
 }
-

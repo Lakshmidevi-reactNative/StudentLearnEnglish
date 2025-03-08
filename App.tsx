@@ -24,6 +24,7 @@ import LanguageAttemptScreen from "./MainScreeens/assignments/LanguageAttemptScr
 import TypingPracticeScreen from "./MainScreeens/assignments/TypingPracticeScreen";
 
 // Import authentication screens
+import SplashScreen from "./MainScreeens/AuthScreens/SplashScreen";
 import LoginScreen from "./MainScreeens/AuthScreens/LoginScreen";
 import SignupScreen from "./MainScreeens/AuthScreens/SignupScreen";
 import OnboardingScreen from "./MainScreeens/AuthScreens/OnboardingScreen";
@@ -84,9 +85,11 @@ import TypingResult from "./MainScreeens/ResultPages/TypingResult";
 function AuthStackNavigator() {
 	return (
 		<AuthStack.Navigator
-			initialRouteName="Signup"
+			initialRouteName="Splash"
 			screenOptions={{ headerShown: false }}
 		>
+			<AuthStack.Screen name="Splash" component={SplashScreen} />
+
 			<AuthStack.Screen name="Welcome" component={WelcomeScreen} />
 			<AuthStack.Screen name="Login" component={LoginScreen} />
 			<AuthStack.Screen name="Signup" component={SignupScreen} />
