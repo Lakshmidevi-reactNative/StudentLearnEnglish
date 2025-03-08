@@ -11,7 +11,7 @@ import {
 	KeyboardAvoidingView,
 	Platform,
 } from "react-native";
-import { useTheme } from "../../App";
+import { useTheme } from "../../../App";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 const LoginScreen = ({ navigation }) => {

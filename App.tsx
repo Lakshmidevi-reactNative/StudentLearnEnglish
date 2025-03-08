@@ -21,14 +21,20 @@ import ProfileScreen from "./MainScreeens/ProfileScreen";
 import { ThemeProvider } from "./MainScreeens/constants/ThemeContext";
 import RoleplayAttemptScreen from "./MainScreeens/assignments/RoleplayAttemptScreen";
 import LanguageAttemptScreen from "./MainScreeens/assignments/LanguageAttemptScreen";
-// import LanguagePracticeScreen from "./MainScreeens/assignments/LanguagePracticeScreen"; // Import the new screen
 import TypingPracticeScreen from "./MainScreeens/assignments/TypingPracticeScreen";
+
+// Import authentication screens
+import LoginScreen from "./MainScreeens/AuthScreens/LoginScreen";
+import SignupScreen from "./MainScreeens/AuthScreens/SignupScreen";
+import OnboardingScreen from "./MainScreeens/AuthScreens/OnboardingScreen";
+import WelcomeScreen from "./MainScreeens/AuthScreens/WelcomeScreen";
 
 // Create navigators
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 const Tab = createBottomTabNavigator();
 const LearnStack = createNativeStackNavigator();
+const AuthStack = createNativeStackNavigator();
 
 // Placeholder screens with common gradient background
 const CommonScreen = ({ title, subtitle = "Coming soon..." }) => {
@@ -67,6 +73,21 @@ import { COLORS } from "./MainScreeens/constants/Colors";
 import { useTheme } from "./MainScreeens/constants/ThemeContext";
 
 import PremiumScreen from "./MainScreeens/PremiumScreen";
+
+// Authentication Stack Navigator - manages auth flow
+function AuthStackNavigator() {
+	return (
+		<AuthStack.Navigator
+			initialRouteName="Onboarding"
+			screenOptions={{ headerShown: false }}
+		>
+			<AuthStack.Screen name="Welcome" component={WelcomeScreen} />
+			<AuthStack.Screen name="Login" component={LoginScreen} />
+			<AuthStack.Screen name="Signup" component={SignupScreen} />
+			<AuthStack.Screen name="Onboarding" component={OnboardingScreen} />
+		</AuthStack.Navigator>
+	);
+}
 
 // Learn Stack Navigator - manages the learning section flow
 function LearnStackNavigator() {
@@ -176,20 +197,31 @@ function RootStack() {
 			<Stack.Screen name="Profile" component={ProfileScreen} />
 			<Stack.Screen name="RoleplayAttempt" component={RoleplayAttemptScreen} />
 			<Stack.Screen name="LanguageAttempt" component={LanguageAttemptScreen} />
-			{/* <Stack.Screen name="LanguagePractice" component={LanguagePracticeScreen} /> */}
 			<Stack.Screen name="TypingPractice" component={TypingPracticeScreen} />
 		</Stack.Navigator>
 	);
 }
 
 export default function App() {
+	// You can add state management here to check if the user is authenticated
+	// For example: const [isAuthenticated, setIsAuthenticated] = useState(false);
+
 	return (
 		<GestureHandlerRootView style={styles.container}>
 			<ThemeProvider>
 				<SafeAreaProvider style={styles.container}>
 					<Toaster />
 					<NavigationContainer>
-						<RootStack />
+						<Stack.Navigator
+							initialRouteName="Auth"
+							screenOptions={{ headerShown: false }}
+						>
+							{/* Auth Flow with Welcome as the first screen */}
+							<Stack.Screen name="Auth" component={AuthStackNavigator} />
+
+							{/* Main App Flow */}
+							<Stack.Screen name="Main" component={RootStack} />
+						</Stack.Navigator>
 					</NavigationContainer>
 				</SafeAreaProvider>
 			</ThemeProvider>
