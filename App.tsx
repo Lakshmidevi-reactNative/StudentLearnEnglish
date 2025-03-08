@@ -76,12 +76,15 @@ import { COLORS } from "./MainScreeens/constants/Colors";
 import { useTheme } from "./MainScreeens/constants/ThemeContext";
 
 import PremiumScreen from "./MainScreeens/PremiumScreen";
+import LanguageResult from "./MainScreeens/ResultPages/LanguageResult";
+import RoleplayResult from "./MainScreeens/ResultPages/RolePlayResult";
+import TypingResult from "./MainScreeens/ResultPages/TypingResult";
 
 // Authentication Stack Navigator - manages auth flow
 function AuthStackNavigator() {
 	return (
 		<AuthStack.Navigator
-			initialRouteName="Onboarding"
+			initialRouteName="Signup"
 			screenOptions={{ headerShown: false }}
 		>
 			<AuthStack.Screen name="Welcome" component={WelcomeScreen} />
@@ -197,6 +200,9 @@ function RootStack() {
 			<Stack.Screen name="RoleplayAttempt" component={RoleplayAttemptScreen} />
 			<Stack.Screen name="LanguageAttempt" component={LanguageAttemptScreen} />
 			<Stack.Screen name="TypingPractice" component={TypingPracticeScreen} />
+			<Stack.Screen name="LanguageResult" component={LanguageResult} />
+<Stack.Screen name="RoleplayResult" component={RoleplayResult} />
+<Stack.Screen name="TypingResult" component={TypingResult} />
 		</Stack.Navigator>
 	);
 }

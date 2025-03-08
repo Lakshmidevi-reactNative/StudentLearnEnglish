@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -15,6 +15,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "./constants/ThemeContext";
 
 const { width } = Dimensions.get("window");
+
+// Track which screens need refreshing
+const screensNeedRefresh = {};
 
 interface TabIconProps {
 	routeName: string;
@@ -63,6 +66,17 @@ const AnimatedTabBar = ({
 	const opacity = useRef(new Animated.Value(1)).current;
 	const insets = useSafeAreaInsets();
 	const { colors, theme } = useTheme();
+	const [previousTab, setPreviousTab] = useState<string | null>(null);
+
+	// Track tab changes to mark screens for refresh
+	useEffect(() => {
+		const currentRoute = state.routes[state.index];
+		if (previousTab && previousTab !== currentRoute.name) {
+			// Mark the previous screen as needing refresh when we return to it
+			screensNeedRefresh[previousTab] = true;
+		}
+		setPreviousTab(currentRoute.name);
+	}, [state.index, state.routes]);
 
 	const hideTabBar = () => {
 		Animated.parallel([
@@ -113,9 +127,21 @@ const AnimatedTabBar = ({
 		}
 
 		if (!isFocused && !event.defaultPrevented) {
+			// Navigate to the selected tab
 			navigation.navigate(route.name);
+			
+			// Check if this screen needs a refresh
+			if (screensNeedRefresh[route.name]) {
+				// Reset the tab's navigation state to force a refresh
+				navigation.reset({
+					index: 0,
+					routes: [{ name: route.name }],
+				});
+				// Clear the refresh flag
+				screensNeedRefresh[route.name] = false;
+			}
 		} else if (isFocused) {
-			// Reset the stack to the first screen if on the same tab
+			// Always reset the current tab when clicking on it again
 			navigation.reset({
 				index: 0,
 				routes: [{ name: route.name }],

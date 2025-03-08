@@ -32,7 +32,6 @@ import {
 	processUrlUpload,
 	processTextContent,
 	ContentAnalysis,
-	testApiConnectivity,
 } from "../services/PythonApis";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -118,28 +117,20 @@ export default function ContentListTemplate() {
 	const [contentTitle, setContentTitle] = useState("");
 	const [contentDescription, setContentDescription] = useState("");
 
-	// Load student ID from storage and test API connectivity on component mount
+	// Load student ID from storage on component mount
 	useEffect(() => {
-		const initializeComponent = async () => {
+		const loadStudentId = async () => {
 			try {
-				// Load student ID
 				const storedId = await AsyncStorage.getItem("studentId");
 				if (storedId) {
 					setStudentId(parseInt(storedId, 10));
 				}
-				
-				// Test API connectivity
-				const isApiReachable = await testApiConnectivity();
-				if (!isApiReachable) {
-					console.warn("Warning: Spring API might not be reachable. Upload functionality may be limited.");
-					// Optionally show a toast or alert to the user
-				}
 			} catch (error) {
-				console.error("Error during component initialization:", error);
+				console.error("Error loading student ID:", error);
 			}
 		};
 
-		initializeComponent();
+		loadStudentId();
 	}, []);
 
 	const goBack = () => {
@@ -357,23 +348,6 @@ export default function ContentListTemplate() {
 		setLoadingMessage("Analyzing content...");
 
 		try {
-			console.log("Starting text upload process");
-			console.log("Content title:", contentTitle);
-			console.log("Student ID:", studentId);
-			console.log("Text length:", pastedText.length);
-			
-			// Check API connectivity before proceeding
-			const isApiReachable = await testApiConnectivity();
-			if (!isApiReachable) {
-				console.warn("Spring API is not reachable. Upload may fail.");
-				// Still proceed to try, but warn the user
-				Alert.alert(
-					"Warning", 
-					"The server might be unavailable. We'll try to upload anyway.",
-					[{ text: "Continue" }]
-				);
-			}
-
 			// Use the processTextContent function from your API service with student ID
 			const contentAnalysis = await processTextContent(
 				pastedText,
@@ -415,14 +389,10 @@ export default function ContentListTemplate() {
 			);
 		} catch (error) {
 			console.error("Error processing text:", error);
-			
-			// Provide more detailed error message
-			let errorMessage = "There was an error analyzing your text. Please try again.";
-			if (error.message && error.message.includes("Network request failed")) {
-				errorMessage = "Could not connect to the server. Please check your internet connection and try again.";
-			}
-			
-			Alert.alert("Processing Failed", errorMessage);
+			Alert.alert(
+				"Processing Failed",
+				"There was an error analyzing your text. Please try again."
+			);
 			setIsLoading(false);
 		}
 	};
