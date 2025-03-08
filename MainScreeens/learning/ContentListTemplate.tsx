@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
 	View,
 	Text,
@@ -32,7 +32,9 @@ import {
 	processUrlUpload,
 	processTextContent,
 	ContentAnalysis,
+	testApiConnectivity,
 } from "../services/PythonApis";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Theme colors
 const COLORS = {
@@ -108,12 +110,37 @@ export default function ContentListTemplate() {
 	const [textEditorModalVisible, setTextEditorModalVisible] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [loadingMessage, setLoadingMessage] = useState("Processing...");
+	const [studentId, setStudentId] = useState<number>(3063); // Default student ID
 
 	// States for user inputs
 	const [url, setUrl] = useState("");
 	const [pastedText, setPastedText] = useState("");
 	const [contentTitle, setContentTitle] = useState("");
 	const [contentDescription, setContentDescription] = useState("");
+
+	// Load student ID from storage and test API connectivity on component mount
+	useEffect(() => {
+		const initializeComponent = async () => {
+			try {
+				// Load student ID
+				const storedId = await AsyncStorage.getItem("studentId");
+				if (storedId) {
+					setStudentId(parseInt(storedId, 10));
+				}
+				
+				// Test API connectivity
+				const isApiReachable = await testApiConnectivity();
+				if (!isApiReachable) {
+					console.warn("Warning: Spring API might not be reachable. Upload functionality may be limited.");
+					// Optionally show a toast or alert to the user
+				}
+			} catch (error) {
+				console.error("Error during component initialization:", error);
+			}
+		};
+
+		initializeComponent();
+	}, []);
 
 	const goBack = () => {
 		navigation.navigate("LearnMain");
@@ -149,8 +176,8 @@ export default function ContentListTemplate() {
 
 			setLoadingMessage("Processing file...");
 
-			// Use the processFileUpload function from your API service
-			const contentAnalysis = await processFileUpload(fileUri, fileName);
+			// Use the processFileUpload function from your API service with student ID
+			const contentAnalysis = await processFileUpload(fileUri, fileName, studentId);
 
 			// Create a content item from the analysis result
 			const fileType = file.mimeType?.split("/")[1]?.toUpperCase() || "FILE";
@@ -261,8 +288,8 @@ export default function ContentListTemplate() {
 		}
 
 		try {
-			// Use the processUrlUpload function from your API service
-			const contentAnalysis = await processUrlUpload(url, contentTitle);
+			// Use the processUrlUpload function from your API service with student ID
+			const contentAnalysis = await processUrlUpload(url, contentTitle, studentId);
 
 			// Create a content item from the analysis result
 			const urlType = getUrlType(url);
@@ -330,10 +357,28 @@ export default function ContentListTemplate() {
 		setLoadingMessage("Analyzing content...");
 
 		try {
-			// Use the processTextContent function from your API service
+			console.log("Starting text upload process");
+			console.log("Content title:", contentTitle);
+			console.log("Student ID:", studentId);
+			console.log("Text length:", pastedText.length);
+			
+			// Check API connectivity before proceeding
+			const isApiReachable = await testApiConnectivity();
+			if (!isApiReachable) {
+				console.warn("Spring API is not reachable. Upload may fail.");
+				// Still proceed to try, but warn the user
+				Alert.alert(
+					"Warning", 
+					"The server might be unavailable. We'll try to upload anyway.",
+					[{ text: "Continue" }]
+				);
+			}
+
+			// Use the processTextContent function from your API service with student ID
 			const contentAnalysis = await processTextContent(
 				pastedText,
-				contentTitle
+				contentTitle,
+				studentId
 			);
 
 			// Calculate approximate size - using safer approach for React Native
@@ -370,10 +415,14 @@ export default function ContentListTemplate() {
 			);
 		} catch (error) {
 			console.error("Error processing text:", error);
-			Alert.alert(
-				"Processing Failed",
-				"There was an error analyzing your text. Please try again."
-			);
+			
+			// Provide more detailed error message
+			let errorMessage = "There was an error analyzing your text. Please try again.";
+			if (error.message && error.message.includes("Network request failed")) {
+				errorMessage = "Could not connect to the server. Please check your internet connection and try again.";
+			}
+			
+			Alert.alert("Processing Failed", errorMessage);
 			setIsLoading(false);
 		}
 	};

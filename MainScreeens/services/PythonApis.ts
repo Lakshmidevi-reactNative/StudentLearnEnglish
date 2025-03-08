@@ -5,6 +5,7 @@ import * as FileSystem from "expo-file-system";
 // Replace this with your actual API URL
 const PYTHON_BASE_URL = "https://ai.learneng.app";
 const FILE_UPLOAD_URL = "https://hp.kgtopg.com/file-upload-server/";
+const CONTENT_API_URL = "https://ai.learneng.app/student/content"; // Updated Spring API endpoint
 
 /**
  * Interface for content analysis result
@@ -16,6 +17,44 @@ export interface ContentAnalysis {
 	url?: string;
 	sourceType: "file" | "url" | "text";
 }
+
+/**
+ * Interface for content post request
+ */
+export interface ContentPostRequest {
+	conTitle: string;
+	uploadFileUrl: string;
+	contLevel: string;
+	conText: string;
+	uploadType: string;
+	studentId: number;
+}
+
+/**
+ * Tests connectivity to the Spring API
+ */
+export const testApiConnectivity = async (): Promise<boolean> => {
+	try {
+		console.log("Testing API connectivity to:", CONTENT_API_URL);
+		
+		// Attempt a simple HEAD request to check if the API is reachable
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 5000); // 5-second timeout
+		
+		const response = await fetch(CONTENT_API_URL, {
+			method: "HEAD",
+			signal: controller.signal,
+		});
+		
+		clearTimeout(timeoutId);
+		
+		console.log("API test response status:", response.status);
+		return response.status < 500; // Consider any non-server error as "reachable"
+	} catch (error) {
+		console.error("API connectivity test failed:", error);
+		return false;
+	}
+};
 
 /**
  * Detects the language level of the provided text
@@ -175,21 +214,96 @@ export const extractTextFromUrl = async (url: string): Promise<string> => {
 };
 
 /**
+ * Posts content to the Spring API
+ */
+export const postContentToApi = async (contentData: ContentPostRequest): Promise<any> => {
+	try {
+		// Log the request details for debugging
+		console.log("Posting to API URL:", CONTENT_API_URL);
+		console.log("Content data being posted:", JSON.stringify(contentData, null, 2));
+		
+		// Add a timeout to the fetch for better error reporting
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
+		
+		const response = await fetch(CONTENT_API_URL, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Accept": "application/json",
+			},
+			body: JSON.stringify(contentData),
+			signal: controller.signal,
+		});
+		
+		clearTimeout(timeoutId);
+
+		// Log the response status and headers
+		console.log("API Response Status:", response.status);
+		console.log("API Response Status Text:", response.statusText);
+		
+		if (!response.ok) {
+			const errorText = await response.text();
+			console.error("API Error Response:", errorText);
+			throw new Error(`Failed to post content: ${errorText}`);
+		}
+
+		const responseData = await response.json();
+		console.log("API Response Data:", responseData);
+		return responseData;
+	} catch (error) {
+		if (error.name === 'AbortError') {
+			console.error("API request timed out");
+			throw new Error("API request timed out. Please check your internet connection and the API server.");
+		}
+		console.error("Error posting content to API:", error);
+		throw error;
+	}
+};
+
+/**
  * Processes a file upload with all required API calls
  */
 export const processFileUpload = async (
 	fileUri: string,
-	title: string
+	title: string,
+	studentId: number
 ): Promise<ContentAnalysis> => {
 	try {
+		console.log("Processing file upload...");
+		console.log("File URI:", fileUri);
+		console.log("Title:", title);
+		console.log("Student ID:", studentId);
+		
 		// Step 1: Upload file to get URL
+		console.log("Uploading file to get URL...");
 		const fileUrl = await uploadFile(fileUri);
+		console.log("File URL:", fileUrl);
 
 		// Step 2: Extract text from file
+		console.log("Extracting text from file...");
 		const extractedText = await extractTextFromFile(fileUri);
+		console.log("Extracted text length:", extractedText.length);
 
 		// Step 3: Detect language level
+		console.log("Detecting language level...");
 		const level = await detectLevel(extractedText);
+		console.log("Detected level:", level);
+
+		// Prepare data for API
+		const contentData = {
+			conTitle: title,
+			uploadFileUrl: fileUrl,
+			contLevel: level,
+			conText: extractedText,
+			uploadType: "1", // Changed to "1" for document type
+			studentId: studentId,
+		};
+		
+		console.log("Posting content to Spring API...");
+		// Step 4: Post content to Spring API
+		const apiResponse = await postContentToApi(contentData);
+		console.log("Spring API response:", apiResponse);
 
 		return {
 			text: extractedText,
@@ -209,14 +323,39 @@ export const processFileUpload = async (
  */
 export const processUrlUpload = async (
 	url: string,
-	title: string
+	title: string,
+	studentId: number
 ): Promise<ContentAnalysis> => {
 	try {
+		console.log("Processing URL upload...");
+		console.log("URL:", url);
+		console.log("Title:", title);
+		console.log("Student ID:", studentId);
+		
 		// Step 1: Extract text from URL
+		console.log("Extracting text from URL...");
 		const extractedText = await extractTextFromUrl(url);
+		console.log("Extracted text length:", extractedText.length);
 
 		// Step 2: Detect language level
+		console.log("Detecting language level...");
 		const level = await detectLevel(extractedText);
+		console.log("Detected level:", level);
+
+		// Prepare data for API
+		const contentData = {
+			conTitle: title,
+			uploadFileUrl: url,
+			contLevel: level,
+			conText: extractedText,
+			uploadType: "2", // URL/Link type
+			studentId: studentId,
+		};
+		
+		console.log("Posting content to Spring API...");
+		// Step 3: Post content to Spring API
+		const apiResponse = await postContentToApi(contentData);
+		console.log("Spring API response:", apiResponse);
 
 		return {
 			text: extractedText,
@@ -236,11 +375,34 @@ export const processUrlUpload = async (
  */
 export const processTextContent = async (
 	text: string,
-	title: string
+	title: string,
+	studentId: number
 ): Promise<ContentAnalysis> => {
 	try {
+		console.log("Processing text content...");
+		console.log("Title:", title);
+		console.log("Student ID:", studentId);
+		console.log("Text length:", text.length);
+		
 		// Detect language level
+		console.log("Detecting language level...");
 		const level = await detectLevel(text);
+		console.log("Detected level:", level);
+
+		// Prepare data for API
+		const contentData = {
+			conTitle: title,
+			uploadFileUrl: "manual-entry",
+			contLevel: level,
+			conText: text,
+			uploadType: "3", // Text type
+			studentId: studentId,
+		};
+		
+		console.log("Posting content to Spring API...");
+		// Post content to Spring API
+		const apiResponse = await postContentToApi(contentData);
+		console.log("Spring API response:", apiResponse);
 
 		return {
 			text: text,
