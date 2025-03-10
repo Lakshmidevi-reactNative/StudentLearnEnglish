@@ -46,7 +46,7 @@ const WelcomeScreen = ({ navigation }) => {
 
 				<View style={styles.contentContainer}>
 					<Image
-						source={require("../../assets/icon.png")}
+						source={require("../../assets/logo.png")}
 						style={styles.logo}
 						resizeMode="contain"
 					/>
@@ -54,7 +54,15 @@ const WelcomeScreen = ({ navigation }) => {
 					<View style={styles.titleContainer}>
 						<Text style={[styles.title, { color: authColors.titleText }]}>
 							Welcome to
-							<Text style={{ color: authColors.brandPrimary }}> Learn</Text>
+							<Text
+								style={{
+									color: authColors.brandPrimary,
+									textDecorationColor: "white",
+								}}
+							>
+								<Text> </Text>
+								Learn
+							</Text>
 							<Text style={{ color: authColors.brandSecondary }}>Eng</Text>
 						</Text>
 

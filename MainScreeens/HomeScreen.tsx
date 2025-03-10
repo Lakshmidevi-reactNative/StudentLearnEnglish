@@ -23,18 +23,21 @@ import {
 	DrawerActions,
 	NavigationProp,
 } from "@react-navigation/native";
-import { RootStackParamList } from "../types"; // Adjust the import path as necessary
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useTheme } from "./constants/ThemeContext";
+import { useAuth } from "./AuthScreens/AuthContext.tsx"; // Import auth context
 import LearningActivitiesCarousel from "./constants/LearningActivitiesCarousel";
 
 const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
+	// Get student info from auth context
+	const { studentInfo } = useAuth();
+
 	// activeTab state is now handled by the tab navigator
 	const [greeting, setGreeting] = useState("");
-	const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+	const navigation = useNavigation();
 	const { colors, theme } = useTheme();
 
 	useEffect(() => {
@@ -173,9 +176,12 @@ export default function HomeScreen() {
 						onPress={() => navigation.navigate("Profile")}
 					>
 						<Image
-							source={{
-								uri: "https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20female%20student%20with%20a%20friendly%20smile&aspect=1:1&seed=123",
-							}}
+							source={
+								studentInfo?.student_photo &&
+								!studentInfo.student_photo.includes("default.jpg")
+									? { uri: studentInfo.student_photo }
+									: require("../assets/logo.png") // Make sure you have this default image
+							}
 							style={[styles.profileImage, { borderColor: colors.neonPurple }]}
 						/>
 						<View
@@ -199,7 +205,7 @@ export default function HomeScreen() {
 									{greeting},
 								</Text>
 								<Text style={[styles.userName, { color: colors.textPrimary }]}>
-									Sarah
+									{studentInfo?.student_name || "Student"}
 								</Text>
 							</View>
 							<View

@@ -1,3 +1,4 @@
+// MainScreeens/CustomDrawerContent.tsx
 import React from "react";
 import {
 	View,
@@ -15,19 +16,47 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "./constants/ThemeContext";
-
 import { DrawerContentComponentProps } from "@react-navigation/drawer";
+import { CommonActions } from "@react-navigation/native";
 
-export default function CustomDrawerContent(
-	props: DrawerContentComponentProps
-) {
-	// Use our theme context
+interface CustomDrawerContentProps extends DrawerContentComponentProps {
+	studentInfo: any;
+	onLogout: () => Promise<void>;
+}
+
+export default function CustomDrawerContent(props: CustomDrawerContentProps) {
 	const { theme, colors, toggleTheme } = useTheme();
 	const isDarkMode = theme === "dark";
+	const { studentInfo, onLogout } = props;
+
+	const handleLogout = async () => {
+		try {
+			// Call the logout function from AuthContext
+			await onLogout();
+
+			// Reset navigation to Auth stack's Signup screen
+			props.navigation.dispatch(
+				CommonActions.reset({
+					index: 0,
+					routes: [
+						{
+							name: "Auth",
+							state: {
+								routes: [{ name: "Signup" }],
+							},
+						},
+					],
+				})
+			);
+		} catch (error) {
+			console.error("Error during logout:", error);
+		}
+	};
 
 	return (
 		<LinearGradient
 			colors={[colors.deepBlue, colors.softPurple]}
+			// colors={["#0f2027", "#203a439", "#2d2d86"]}
 			style={styles.container}
 			start={{ x: 0, y: 0 }}
 			end={{ x: 1, y: 1 }}
@@ -38,24 +67,31 @@ export default function CustomDrawerContent(
 			>
 				<View style={styles.profileSection}>
 					<Image
-						source={{
-							uri: "https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20female%20student%20with%20a%20friendly%20smile&aspect=1:1&seed=123",
-						}}
+						source={
+							studentInfo?.student_photo &&
+							!studentInfo.student_photo.includes("default.jpg")
+								? { uri: studentInfo.student_photo }
+								: {
+										uri: "https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20female%20student%20with%20a%20friendly%20smile&aspect=1:1&seed=123",
+								  }
+						}
 						style={[styles.profileImage, { borderColor: colors.neonPurple }]}
 					/>
 					<Text style={[styles.profileName, { color: colors.textPrimary }]}>
-						Sarah Johnson
+						{studentInfo?.student_name || "Guest User"}
 					</Text>
 					<View
 						style={[
 							styles.levelBadge,
 							{
-								backgroundColor: theme === 'dark' 
-                  ? "rgba(0, 180, 255, 0.2)" 
-                  : "rgba(0, 133, 204, 0.2)",
-								borderColor: theme === 'dark'
-                  ? "rgba(0, 180, 255, 0.5)"
-                  : "rgba(0, 133, 204, 0.5)",
+								backgroundColor:
+									theme === "dark"
+										? "rgba(0, 180, 255, 0.2)"
+										: "rgba(0, 133, 204, 0.2)",
+								borderColor:
+									theme === "dark"
+										? "rgba(0, 180, 255, 0.5)"
+										: "rgba(0, 133, 204, 0.5)",
 							},
 						]}
 					>
@@ -94,7 +130,7 @@ export default function CustomDrawerContent(
 					/>
 				</View>
 
-				<TouchableOpacity style={styles.logoutButton}>
+				<TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
 					<MaterialCommunityIcons
 						name="logout"
 						size={20}
@@ -149,29 +185,6 @@ const styles = StyleSheet.create({
 	levelText: {
 		fontWeight: "600",
 		fontSize: 12,
-	},
-	statsContainer: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		marginHorizontal: 20,
-		marginVertical: 10,
-		borderRadius: 12,
-		borderWidth: 1,
-		padding: 15,
-	},
-	statItem: {
-		alignItems: "center",
-		flex: 1,
-	},
-	statNumber: {
-		fontSize: 20,
-		fontWeight: "700",
-	},
-	statLabel: {
-		fontSize: 12,
-	},
-	divider: {
-		width: 1,
 	},
 	dividerHorizontal: {
 		height: 1,

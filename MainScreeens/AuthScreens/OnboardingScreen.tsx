@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
 	View,
 	Text,
 	StyleSheet,
 	TouchableOpacity,
-	FlatList,
 	Dimensions,
 	Image,
 	SafeAreaView,
@@ -12,10 +11,10 @@ import {
 	TextInput,
 	ScrollView,
 } from "react-native";
-import { useTheme } from "../constants/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import getAuthColors from "./AuthColors";
+import { NavigationProp, RouteProp } from "@react-navigation/native";
+import axios from "axios";
 
 const { width, height } = Dimensions.get("window");
 
@@ -44,32 +43,47 @@ const LANGUAGES = [
 	"Other",
 ];
 
-// English proficiency levels
+// English proficiency levels with CEFR levels
 const LEVELS = [
 	{
 		id: "beginner",
 		label: "Beginner",
-		description: "I know a few words and phrases",
+		cefr: "A1",
+		description: "I can say hello, my name, and talk about what I do.",
+		icon: "walk",
+		iconColor: "#FFFFFF",
 	},
 	{
 		id: "lower_intermediate",
 		label: "Lower Intermediate",
-		description: "I can have simple conversations",
+		cefr: "A2",
+		description: "I can talk about my past and my plans comfortably.",
+		icon: "bicycle",
+		iconColor: "#FFCC00",
 	},
 	{
 		id: "intermediate",
 		label: "Intermediate",
-		description: "I can express myself on many topics",
+		cefr: "B1",
+		description: "I can talk freely about everyday topics and my profession.",
+		icon: "bicycle",
+		iconColor: "#FFFFFF",
 	},
 	{
 		id: "upper_intermediate",
 		label: "Upper Intermediate",
-		description: "I can communicate fluently with few errors",
+		cefr: "B2",
+		description: "I can talk about a broad range of topics with confidence.",
+		icon: "car",
+		iconColor: "#FF5555",
 	},
 	{
 		id: "advanced",
 		label: "Advanced",
-		description: "I'm nearly fluent in English",
+		cefr: "C1",
+		description: "I'm nearly fluent in English.",
+		icon: "airplane",
+		iconColor: "#FFFFFF",
 	},
 ];
 
@@ -124,16 +138,15 @@ const REGIONS = [
 	{ id: "other", label: "Other Regions", flag: "🌍" },
 ];
 
-// User reviews for career and connection goals
+// User reviews
 const USER_REVIEWS = [
 	{
 		id: 1,
 		name: "Sarah K.",
 		role: "Software Engineer",
 		rating: 5,
-		review:
-			"LearnEng helped me improve my technical English, which was crucial for my job interviews with international companies.",
-		photo: require("../../assets/icon.png"), // Replace with actual photo
+		review: "LearnEng helped me improve my technical English...",
+		photo: require("../../assets/logo.png"),
 		goal: "career",
 	},
 	{
@@ -141,9 +154,8 @@ const USER_REVIEWS = [
 		name: "Michael T.",
 		role: "Marketing Manager",
 		rating: 5,
-		review:
-			"The business English modules were exactly what I needed to boost my confidence in meetings with global clients.",
-		photo: require("../../assets/icon.png"), // Replace with actual photo
+		review: "The business English modules were exactly what I needed...",
+		photo: require("../../assets/logo.png"),
 		goal: "career",
 	},
 	{
@@ -151,9 +163,8 @@ const USER_REVIEWS = [
 		name: "Raj P.",
 		role: "International Student",
 		rating: 5,
-		review:
-			"I've made friends from all over the world thanks to the conversation practice in LearnEng.",
-		photo: require("../../assets/icon.png"), // Replace with actual photo
+		review: "I've made friends from all over the world...",
+		photo: require("../../assets/logo.png"),
 		goal: "connect",
 	},
 	{
@@ -161,14 +172,11 @@ const USER_REVIEWS = [
 		name: "Elena M.",
 		role: "Travel Enthusiast",
 		rating: 4,
-		review:
-			"The app's social features helped me connect with locals before my trip abroad. Made my travels so much more authentic!",
-		photo: require("../../assets/icon.png"), // Replace with actual photo
+		review: "The app's social features helped me connect with locals...",
+		photo: require("../../assets/logo.png"),
 		goal: "connect",
 	},
 ];
-
-import { NavigationProp, RouteProp } from "@react-navigation/native";
 
 type OnboardingScreenProps = {
 	navigation: NavigationProp<any>;
@@ -176,173 +184,303 @@ type OnboardingScreenProps = {
 };
 
 const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
-	const { theme, colors } = useTheme();
-	const isDarkMode = theme === "dark";
-	const authColors = getAuthColors(isDarkMode);
+	const customColors = {
+		background: "#1F1B3C",
+		gradientStart: "#1F1B3C",
+		gradientMiddle: "#2A2650",
+		gradientEnd: "#333180",
+		primaryText: "#FFFFFF",
+		secondaryText: "#CCCCFF",
+		primaryButton: "#4A90E2",
+		cardBackground: "rgba(255, 255, 255, 0.15)",
+		cardBorder: "rgba(255, 255, 255, 0.2)",
+		progressBar: "rgba(255, 255, 255, 0.2)",
+		progressBarActive: "#4A90E2",
+		selectedCard: "rgba(74, 144, 226, 0.2)",
+		inputBackground: "rgba(255, 255, 255, 0.1)",
+		inputBorder: "rgba(255, 255, 255, 0.2)",
+		iconBackground: "rgba(255, 255, 255, 0.2)",
+		placeholder: "#9999CC",
+	};
 
-	// Get user's name from signup page
 	const userName = route?.params?.firstName || "there";
-
-	// ===== IMPORTANT CHANGES BEGIN =====
-	// We need to generate all possible phases up front instead of dynamically adding them
-	// Create array of ALL possible screen indices
 	const ALL_PHASES = [0, 1, 2, 3, 4, 5, 6, 7];
-
-	// State to track which phases are active and visible in the flow
 	const [activePhases, setActivePhases] = useState([0, 1, 2, 3]);
 	const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
-	// ===== IMPORTANT CHANGES END =====
-
 	const [motherTongue, setMotherTongue] = useState("");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
 	const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
 	const [educationLevel, setEducationLevel] = useState<string | null>(null);
 	const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-	const flatListRef = useRef(null);
 
-	// Filter languages based on search query
 	const filteredLanguages = LANGUAGES.filter((lang) =>
 		lang.toLowerCase().includes(searchQuery.toLowerCase())
 	);
 
-	// Toggle goal selection
 	const toggleGoal = (goalId: string) => {
-		if (selectedGoals.includes(goalId)) {
-			setSelectedGoals(selectedGoals.filter((id) => id !== goalId));
-		} else {
-			setSelectedGoals([...selectedGoals, goalId]);
-		}
+		setSelectedGoals((prev) =>
+			prev.includes(goalId)
+				? prev.filter((id) => id !== goalId)
+				: [...prev, goalId]
+		);
 	};
 
-	// Filter reviews based on selected goals
 	const filteredReviews = USER_REVIEWS.filter((review) =>
 		selectedGoals.includes(review.goal)
 	);
 
-	// Effect to update active phases based on selected goals
 	useEffect(() => {
-		let newActivePhases = [0, 1, 2, 3]; // Base phases
-
-		if (selectedGoals.includes("education")) {
-			// Add education level phase
-			newActivePhases.push(4);
-		}
-
-		if (selectedGoals.includes("career") || selectedGoals.includes("connect")) {
-			// Add reviews phase
+		let newActivePhases = [0, 1, 2, 3];
+		if (selectedGoals.includes("education")) newActivePhases.push(4);
+		if (selectedGoals.includes("career") || selectedGoals.includes("connect"))
 			newActivePhases.push(5);
-		}
-
-		if (
-			selectedGoals.includes("travel") ||
-			selectedGoals.includes("relocate")
-		) {
-			// Add region selection phase
+		if (selectedGoals.includes("travel") || selectedGoals.includes("relocate"))
 			newActivePhases.push(6);
-		}
-
-		// Add final phase
 		newActivePhases.push(7);
-
-		// Update active phases
 		setActivePhases(newActivePhases);
 	}, [selectedGoals]);
 
-	// ===== IMPORTANT CHANGES BEGIN =====
-	// Get the current screen index based on the phase index in activePhases
+	const saveStudentData = async () => {
+		if (!motherTongue || !selectedLevel) {
+			alert("Please complete all required fields");
+			return;
+		}
+
+		const apiUrl =
+			"http://192.168.29.37:8080/learnengspring/student/save-onboarding";
+
+		const decisionCriteria = [];
+
+		if (selectedGoals.includes("education")) {
+			decisionCriteria.push({
+				"support to education": educationLevel || "school",
+			});
+		}
+
+		if (selectedGoals.includes("relocate")) {
+			decisionCriteria.push({
+				"move to another country": selectedRegion
+					? REGIONS.find((r) => r.id === selectedRegion)?.label || "America"
+					: "America",
+			});
+		}
+
+		if (selectedGoals.includes("travel")) {
+			decisionCriteria.push({
+				"Prepare to travel": selectedRegion
+					? REGIONS.find((r) => r.id === selectedRegion)?.label || "USA"
+					: "USA",
+			});
+		}
+
+		if (decisionCriteria.length === 0) {
+			decisionCriteria.push({
+				"support to education": "school",
+			});
+		}
+
+		const studentData = {
+			studentId: "4367",
+			motherTongue: motherTongue.toLowerCase(),
+			level_criteria_name: selectedLevel,
+			decision_criteria_name: decisionCriteria,
+		};
+
+		try {
+			const response = await axios.post(apiUrl, studentData, {
+				headers: {
+					"Content-Type": "application/json",
+				},
+				timeout: 10000,
+			});
+
+			console.log("Student data saved successfully:", response.data);
+			navigation.navigate("Main");
+		} catch (error) {
+			console.error("Error saving student data:", error);
+			if (error.response) {
+				console.error("Response data:", error.response.data);
+				console.error("Response status:", error.response.status);
+			}
+			alert(
+				"Failed to save your preferences. Please check your internet connection and try again."
+			);
+		}
+	};
+
 	const currentScreen = activePhases[currentPhaseIndex];
 
 	const handleNext = () => {
-		// Check if there is a next phase in our active phases
 		if (currentPhaseIndex < activePhases.length - 1) {
-			// Only increment the phase index, not the screen index
 			setCurrentPhaseIndex(currentPhaseIndex + 1);
 		} else {
-			// Last phase - go to main app
 			navigation.navigate("Main");
 		}
 	};
 
 	const handlePrevious = () => {
-		if (currentPhaseIndex > 0) {
-			setCurrentPhaseIndex(currentPhaseIndex - 1);
-		}
+		if (currentPhaseIndex > 0) setCurrentPhaseIndex(currentPhaseIndex - 1);
 	};
-	// ===== IMPORTANT CHANGES END =====
 
 	const handleSkip = () => {
-		// Skip onboarding and go directly to main app
 		navigation.navigate("Main");
 	};
 
-	// Render welcome phase
+	// Sticky header function
+	const renderStickyHeader = () => {
+		let title = "";
+		let subtitle = "";
+
+		switch (currentScreen) {
+			case 0:
+				title = `Welcome, ${userName}!`;
+				subtitle =
+					"We're excited to have you join LearnEng. Let's personalize your learning experience.";
+				break;
+			case 1:
+				title = "What's your mother tongue?";
+				subtitle =
+					"This helps us tailor lessons to address common challenges for speakers of your language.";
+				break;
+			case 2:
+				title = "What is your level of English?";
+				subtitle = "AI Tutor will match lessons to your English level";
+				break;
+			case 3:
+				title = "Why are you learning English?";
+				subtitle =
+					"Select all that apply. This helps us recommend the most relevant content.";
+				break;
+			case 4:
+				title = "What's your current education level?";
+				subtitle = "We'll recommend content relevant to your academic needs.";
+				break;
+			case 5:
+				title = "Success Stories from LearnEng";
+				subtitle = "See how others achieved their goals with LearnEng.";
+				break;
+			case 6:
+				title = selectedGoals.includes("travel")
+					? "Where do you plan to travel?"
+					: "Where do you plan to relocate?";
+				subtitle = "We'll prioritize content relevant to your destination.";
+				break;
+			case 7:
+				title = `You're all set, ${userName}!`;
+				subtitle =
+					"We've personalized your learning experience based on your preferences. Let's start your English learning journey!";
+				break;
+			default:
+				break;
+		}
+
+		return (
+			<View style={styles.stickyHeader}>
+				<View style={styles.mascotContainer}>
+					<Image
+						source={require("../../assets/logo.png")}
+						style={styles.mascotImage}
+						resizeMode="contain"
+					/>
+				</View>
+				<Text
+					style={[
+						currentScreen === 0 || currentScreen === 7
+							? styles.welcomeTitle
+							: styles.phaseTitle,
+						{ color: customColors.primaryText, textAlign: "center" },
+					]}
+				>
+					{title}
+				</Text>
+				<Text
+					style={[
+						currentScreen === 0 || currentScreen === 7
+							? styles.welcomeSubtitle
+							: styles.phaseSubtitle,
+						{ color: customColors.secondaryText, textAlign: "center" },
+					]}
+				>
+					{subtitle}
+				</Text>
+			</View>
+		);
+	};
+
 	const renderWelcome = () => (
 		<View style={styles.phaseContainer}>
-			<Image
-				source={require("../../assets/icon.png")}
-				style={styles.welcomeImage}
-				resizeMode="contain"
-			/>
-			<Text style={[styles.welcomeTitle, { color: authColors.titleText }]}>
-				Welcome, {userName}!
-			</Text>
-			<Text
-				style={[styles.welcomeSubtitle, { color: authColors.secondaryText }]}
-			>
-				We're excited to have you join LearnEng. Let's personalize your learning
-				experience.
-			</Text>
-
 			<View style={styles.featuresContainer}>
 				<View style={styles.featureItem}>
-					<View style={[styles.featureIcon, { backgroundColor: "#4A90E220" }]}>
+					<View
+						style={[
+							styles.featureIcon,
+							{ backgroundColor: "rgba(74, 144, 226, 0.2)" },
+						]}
+					>
 						<Ionicons name="book" size={24} color="#4A90E2" />
 					</View>
 					<View style={styles.featureTextContainer}>
 						<Text
-							style={[styles.featureTitle, { color: authColors.primaryText }]}
+							style={[styles.featureTitle, { color: customColors.primaryText }]}
 						>
 							Personalized Learning
 						</Text>
 						<Text
-							style={[styles.featureDesc, { color: authColors.secondaryText }]}
+							style={[
+								styles.featureDesc,
+								{ color: customColors.secondaryText },
+							]}
 						>
 							Lessons tailored to your level and goals
 						</Text>
 					</View>
 				</View>
-
 				<View style={styles.featureItem}>
-					<View style={[styles.featureIcon, { backgroundColor: "#9B59B620" }]}>
+					<View
+						style={[
+							styles.featureIcon,
+							{ backgroundColor: "rgba(155, 89, 182, 0.2)" },
+						]}
+					>
 						<Ionicons name="mic" size={24} color="#9B59B6" />
 					</View>
 					<View style={styles.featureTextContainer}>
 						<Text
-							style={[styles.featureTitle, { color: authColors.primaryText }]}
+							style={[styles.featureTitle, { color: customColors.primaryText }]}
 						>
 							Practice Speaking
 						</Text>
 						<Text
-							style={[styles.featureDesc, { color: authColors.secondaryText }]}
+							style={[
+								styles.featureDesc,
+								{ color: customColors.secondaryText },
+							]}
 						>
 							Improve your pronunciation and fluency
 						</Text>
 					</View>
 				</View>
-
 				<View style={styles.featureItem}>
-					<View style={[styles.featureIcon, { backgroundColor: "#2ECC7120" }]}>
+					<View
+						style={[
+							styles.featureIcon,
+							{ backgroundColor: "rgba(46, 204, 113, 0.2)" },
+						]}
+					>
 						<Ionicons name="stats-chart" size={24} color="#2ECC71" />
 					</View>
 					<View style={styles.featureTextContainer}>
 						<Text
-							style={[styles.featureTitle, { color: authColors.primaryText }]}
+							style={[styles.featureTitle, { color: customColors.primaryText }]}
 						>
 							Track Progress
 						</Text>
 						<Text
-							style={[styles.featureDesc, { color: authColors.secondaryText }]}
+							style={[
+								styles.featureDesc,
+								{ color: customColors.secondaryText },
+							]}
 						>
 							See your improvement over time
 						</Text>
@@ -352,165 +490,156 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 		</View>
 	);
 
-	// Render mother tongue selection phase
 	const renderMotherTongue = () => (
 		<View style={styles.phaseContainer}>
-			<Text style={[styles.phaseTitle, { color: authColors.titleText }]}>
-				What's your mother tongue?
-			</Text>
-			<Text style={[styles.phaseSubtitle, { color: authColors.secondaryText }]}>
-				This helps us tailor lessons to address common challenges for speakers
-				of your language.
-			</Text>
-
 			<View style={styles.searchContainer}>
 				<View
 					style={[
 						styles.searchWrapper,
 						{
-							backgroundColor: authColors.inputBackground,
-							borderColor: authColors.inputBorder,
+							backgroundColor: customColors.inputBackground,
+							borderColor: customColors.inputBorder,
 						},
 					]}
 				>
 					<Ionicons
 						name="search"
 						size={20}
-						color={authColors.icon}
+						color={customColors.secondaryText}
 						style={styles.searchIcon}
 					/>
 					<TextInput
-						style={[styles.searchInput, { color: authColors.primaryText }]}
+						style={[styles.searchInput, { color: customColors.primaryText }]}
 						placeholder="Search languages..."
-						placeholderTextColor={authColors.placeholder}
+						placeholderTextColor={customColors.placeholder}
 						value={searchQuery}
 						onChangeText={setSearchQuery}
 					/>
-					{searchQuery ? (
+					{searchQuery && (
 						<TouchableOpacity onPress={() => setSearchQuery("")}>
 							<Ionicons
 								name="close-circle"
 								size={20}
-								color={authColors.icon}
+								color={customColors.secondaryText}
 								style={styles.clearIcon}
 							/>
 						</TouchableOpacity>
-					) : null}
+					)}
 				</View>
 			</View>
-
-			<ScrollView style={styles.languageList}>
-				{filteredLanguages.map((language) => (
-					<TouchableOpacity
-						key={language}
-						style={[
-							styles.languageItem,
-							motherTongue === language && {
-								backgroundColor: `${authColors.primaryButton}20`,
-								borderColor: authColors.primaryButton,
-							},
-						]}
-						onPress={() => setMotherTongue(language)}
-					>
-						<Text
+			<View style={styles.languageListContainer}>
+				<ScrollView
+					showsVerticalScrollIndicator={true}
+					contentContainerStyle={styles.languageListContent}
+				>
+					{filteredLanguages.map((language) => (
+						<TouchableOpacity
+							key={language}
 							style={[
-								styles.languageText,
-								{ color: authColors.primaryText },
+								styles.modernCard,
+								styles.languageItem,
 								motherTongue === language && {
-									color: authColors.primaryButton,
-									fontWeight: "600",
+									backgroundColor: customColors.selectedCard,
+									borderColor: customColors.primaryButton,
 								},
 							]}
+							onPress={() => setMotherTongue(language)}
 						>
-							{language}
-						</Text>
-						{motherTongue === language && (
-							<Ionicons
-								name="checkmark-circle"
-								size={22}
-								color={authColors.primaryButton}
-							/>
-						)}
-					</TouchableOpacity>
-				))}
-			</ScrollView>
+							<Text
+								style={[
+									styles.languageText,
+									{ color: customColors.primaryText },
+									motherTongue === language && {
+										color: customColors.primaryButton,
+										fontWeight: "600",
+									},
+								]}
+							>
+								{language}
+							</Text>
+							{motherTongue === language && (
+								<Ionicons
+									name="checkmark-circle"
+									size={22}
+									color={customColors.primaryButton}
+								/>
+							)}
+						</TouchableOpacity>
+					))}
+				</ScrollView>
+			</View>
 		</View>
 	);
 
-	// Render English level selection phase
 	const renderEnglishLevel = () => (
 		<View style={styles.phaseContainer}>
-			<Text style={[styles.phaseTitle, { color: authColors.titleText }]}>
-				What's your English level?
-			</Text>
-			<Text style={[styles.phaseSubtitle, { color: authColors.secondaryText }]}>
-				Select the option that best describes your current proficiency.
-			</Text>
-
 			<View style={styles.levelList}>
 				{LEVELS.map((level) => (
 					<TouchableOpacity
 						key={level.id}
 						style={[
-							styles.levelItem,
+							styles.englishLevelCard,
 							selectedLevel === level.id && {
-								backgroundColor: `${authColors.primaryButton}20`,
-								borderColor: authColors.primaryButton,
+								borderColor: customColors.primaryButton,
+								backgroundColor: customColors.selectedCard,
 							},
 						]}
 						onPress={() => setSelectedLevel(level.id)}
 					>
-						<View style={styles.levelHeader}>
-							<Text
-								style={[
-									styles.levelTitle,
-									{ color: authColors.primaryText },
-									selectedLevel === level.id && {
-										color: authColors.primaryButton,
-									},
-								]}
-							>
-								{level.label}
-							</Text>
-							{selectedLevel === level.id && (
+						<View style={styles.levelIconContainer}>
+							{level.icon === "car" ? (
+								<MaterialIcons
+									name="directions-car"
+									size={24}
+									color={level.iconColor}
+								/>
+							) : (
 								<Ionicons
-									name="checkmark-circle"
-									size={22}
-									color={authColors.primaryButton}
+									name={level.icon as any}
+									size={24}
+									color={level.iconColor}
 								/>
 							)}
 						</View>
-						<Text
-							style={[styles.levelDesc, { color: authColors.secondaryText }]}
-						>
-							{level.description}
-						</Text>
+						<View style={styles.levelTextContainer}>
+							<View style={styles.levelLabelRow}>
+								<Text
+									style={[
+										styles.levelTitle,
+										{ color: customColors.primaryText },
+									]}
+								>
+									{level.label}
+								</Text>
+								{/* <Text style={styles.cefrLevel}>{level.cefr}</Text> */}
+							</View>
+							<Text
+								style={[
+									styles.levelDesc,
+									{ color: customColors.secondaryText },
+								]}
+							>
+								{level.description}
+							</Text>
+						</View>
 					</TouchableOpacity>
 				))}
 			</View>
 		</View>
 	);
 
-	// Render goals selection phase
 	const renderGoals = () => (
 		<View style={styles.phaseContainer}>
-			<Text style={[styles.phaseTitle, { color: authColors.titleText }]}>
-				Why are you learning English?
-			</Text>
-			<Text style={[styles.phaseSubtitle, { color: authColors.secondaryText }]}>
-				Select all that apply. This helps us recommend the most relevant
-				content.
-			</Text>
-
 			<View style={styles.goalsList}>
 				{GOALS.map((goal) => (
 					<TouchableOpacity
 						key={goal.id}
 						style={[
-							styles.goalItem,
+							styles.modernCard,
+							{ flexDirection: "row", alignItems: "center" },
 							selectedGoals.includes(goal.id) && {
-								backgroundColor: `${authColors.primaryButton}20`,
-								borderColor: authColors.primaryButton,
+								backgroundColor: customColors.selectedCard,
+								borderColor: customColors.primaryButton,
 							},
 						]}
 						onPress={() => toggleGoal(goal.id)}
@@ -519,8 +648,8 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 							style={[
 								styles.goalIcon,
 								selectedGoals.includes(goal.id)
-									? { backgroundColor: authColors.primaryButton }
-									: { backgroundColor: authColors.divider },
+									? { backgroundColor: customColors.primaryButton }
+									: { backgroundColor: customColors.iconBackground },
 							]}
 						>
 							<Ionicons name={goal.icon as any} size={24} color="#FFFFFF" />
@@ -528,9 +657,9 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 						<Text
 							style={[
 								styles.goalText,
-								{ color: authColors.primaryText },
+								{ color: customColors.primaryText },
 								selectedGoals.includes(goal.id) && {
-									color: authColors.primaryButton,
+									color: customColors.primaryButton,
 									fontWeight: "600",
 								},
 							]}
@@ -541,7 +670,7 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 							<Ionicons
 								name="checkmark-circle"
 								size={22}
-								color={authColors.primaryButton}
+								color={customColors.primaryButton}
 								style={styles.goalCheck}
 							/>
 						)}
@@ -551,25 +680,17 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 		</View>
 	);
 
-	// Render education level selection (conditional phase)
 	const renderEducationLevel = () => (
 		<View style={styles.phaseContainer}>
-			<Text style={[styles.phaseTitle, { color: authColors.titleText }]}>
-				What's your current education level?
-			</Text>
-			<Text style={[styles.phaseSubtitle, { color: authColors.secondaryText }]}>
-				We'll recommend content relevant to your academic needs.
-			</Text>
-
 			<View style={styles.levelList}>
 				{EDUCATION_LEVELS.map((level) => (
 					<TouchableOpacity
 						key={level.id}
 						style={[
-							styles.levelItem,
+							styles.modernCard,
 							educationLevel === level.id && {
-								backgroundColor: `${authColors.primaryButton}20`,
-								borderColor: authColors.primaryButton,
+								backgroundColor: customColors.selectedCard,
+								borderColor: customColors.primaryButton,
 							},
 						]}
 						onPress={() => setEducationLevel(level.id)}
@@ -578,9 +699,9 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 							<Text
 								style={[
 									styles.levelTitle,
-									{ color: authColors.primaryText },
+									{ color: customColors.primaryText },
 									educationLevel === level.id && {
-										color: authColors.primaryButton,
+										color: customColors.primaryButton,
 									},
 								]}
 							>
@@ -590,12 +711,12 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 								<Ionicons
 									name="checkmark-circle"
 									size={22}
-									color={authColors.primaryButton}
+									color={customColors.primaryButton}
 								/>
 							)}
 						</View>
 						<Text
-							style={[styles.levelDesc, { color: authColors.secondaryText }]}
+							style={[styles.levelDesc, { color: customColors.secondaryText }]}
 						>
 							{level.description}
 						</Text>
@@ -605,23 +726,15 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 		</View>
 	);
 
-	// Render user reviews (conditional phase)
 	const renderReviews = () => (
 		<View style={styles.phaseContainer}>
-			<Text style={[styles.phaseTitle, { color: authColors.titleText }]}>
-				Success Stories from LearnEng
-			</Text>
-			<Text style={[styles.phaseSubtitle, { color: authColors.secondaryText }]}>
-				See how others achieved their goals with LearnEng.
-			</Text>
-
 			<ScrollView style={styles.reviewsList}>
 				{filteredReviews.map((review) => (
 					<View
 						key={review.id}
 						style={[
-							styles.reviewCard,
-							{ backgroundColor: authColors.cardBackground },
+							styles.modernCard,
+							{ backgroundColor: customColors.cardBackground },
 						]}
 					>
 						<View style={styles.reviewHeader}>
@@ -630,7 +743,7 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 								<Text
 									style={[
 										styles.reviewerName,
-										{ color: authColors.primaryText },
+										{ color: customColors.primaryText },
 									]}
 								>
 									{review.name}
@@ -638,14 +751,13 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 								<Text
 									style={[
 										styles.reviewerRole,
-										{ color: authColors.secondaryText },
+										{ color: customColors.secondaryText },
 									]}
 								>
 									{review.role}
 								</Text>
 							</View>
 						</View>
-
 						<View style={styles.ratingContainer}>
 							{[1, 2, 3, 4, 5].map((star) => (
 								<Ionicons
@@ -657,9 +769,8 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 								/>
 							))}
 						</View>
-
 						<Text
-							style={[styles.reviewText, { color: authColors.secondaryText }]}
+							style={[styles.reviewText, { color: customColors.secondaryText }]}
 						>
 							"{review.review}"
 						</Text>
@@ -669,27 +780,18 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 		</View>
 	);
 
-	// Render region selection (conditional phase)
 	const renderRegionSelection = () => (
 		<View style={styles.phaseContainer}>
-			<Text style={[styles.phaseTitle, { color: authColors.titleText }]}>
-				{selectedGoals.includes("travel")
-					? "Where do you plan to travel?"
-					: "Where do you plan to relocate?"}
-			</Text>
-			<Text style={[styles.phaseSubtitle, { color: authColors.secondaryText }]}>
-				We'll prioritize content relevant to your destination.
-			</Text>
-
 			<View style={styles.regionsList}>
 				{REGIONS.map((region) => (
 					<TouchableOpacity
 						key={region.id}
 						style={[
-							styles.regionItem,
+							styles.modernCard,
+							{ flexDirection: "row", alignItems: "center" },
 							selectedRegion === region.id && {
-								backgroundColor: `${authColors.primaryButton}20`,
-								borderColor: authColors.primaryButton,
+								backgroundColor: customColors.selectedCard,
+								borderColor: customColors.primaryButton,
 							},
 						]}
 						onPress={() => setSelectedRegion(region.id)}
@@ -698,9 +800,9 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 						<Text
 							style={[
 								styles.regionText,
-								{ color: authColors.primaryText },
+								{ color: customColors.primaryText },
 								selectedRegion === region.id && {
-									color: authColors.primaryButton,
+									color: customColors.primaryButton,
 									fontWeight: "600",
 								},
 							]}
@@ -711,7 +813,7 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 							<Ionicons
 								name="checkmark-circle"
 								size={22}
-								color={authColors.primaryButton}
+								color={customColors.primaryButton}
 							/>
 						)}
 					</TouchableOpacity>
@@ -720,127 +822,134 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 		</View>
 	);
 
-	// Render final phase
 	const renderFinalPhase = () => (
 		<View style={styles.phaseContainer}>
-			<Image
-				source={require("../../assets/icon.png")}
-				style={styles.finalImage}
-				resizeMode="contain"
-			/>
-			<Text style={[styles.finalTitle, { color: authColors.titleText }]}>
-				You're all set, {userName}!
-			</Text>
-			<Text style={[styles.finalSubtitle, { color: authColors.secondaryText }]}>
-				We've personalized your learning experience based on your preferences.
-				Let's start your English learning journey!
-			</Text>
-
-			<View style={styles.summaryContainer}>
-				<Text style={[styles.summaryTitle, { color: authColors.primaryText }]}>
+			<View
+				style={[
+					styles.summaryContainer,
+					{
+						backgroundColor: customColors.cardBackground,
+						borderColor: customColors.cardBorder,
+						borderWidth: 1,
+					},
+				]}
+			>
+				<Text
+					style={[styles.summaryTitle, { color: customColors.primaryText }]}
+				>
 					Your Personalized Plan:
 				</Text>
-
 				<View style={styles.summaryItem}>
 					<Ionicons
 						name="globe-outline"
 						size={22}
-						color={authColors.primaryButton}
+						color={customColors.primaryButton}
 						style={styles.summaryIcon}
 					/>
 					<Text
-						style={[styles.summaryText, { color: authColors.secondaryText }]}
+						style={[styles.summaryText, { color: customColors.secondaryText }]}
 					>
 						Native language:{" "}
-						<Text style={{ fontWeight: "600" }}>
+						<Text
+							style={{ fontWeight: "600", color: customColors.primaryText }}
+						>
 							{motherTongue || "Not specified"}
 						</Text>
 					</Text>
 				</View>
-
 				<View style={styles.summaryItem}>
 					<Ionicons
 						name="school-outline"
 						size={22}
-						color={authColors.primaryButton}
+						color={customColors.primaryButton}
 						style={styles.summaryIcon}
 					/>
 					<Text
-						style={[styles.summaryText, { color: authColors.secondaryText }]}
+						style={[styles.summaryText, { color: customColors.secondaryText }]}
 					>
 						English level:{" "}
-						<Text style={{ fontWeight: "600" }}>
+						<Text
+							style={{ fontWeight: "600", color: customColors.primaryText }}
+						>
 							{selectedLevel
 								? LEVELS.find((l) => l.id === selectedLevel)?.label
 								: "Not specified"}
 						</Text>
 					</Text>
 				</View>
-
 				<View style={styles.summaryItem}>
 					<Ionicons
 						name="flag-outline"
 						size={22}
-						color={authColors.primaryButton}
+						color={customColors.primaryButton}
 						style={styles.summaryIcon}
 					/>
 					<Text
-						style={[styles.summaryText, { color: authColors.secondaryText }]}
+						style={[styles.summaryText, { color: customColors.secondaryText }]}
 					>
 						Learning goals:{" "}
-						<Text style={{ fontWeight: "600" }}>
+						<Text
+							style={{ fontWeight: "600", color: customColors.primaryText }}
+						>
 							{selectedGoals
 								.map((g) => GOALS.find((goal) => goal.id === g)?.label)
 								.join(", ") || "Not specified"}
 						</Text>
 					</Text>
 				</View>
-
 				{educationLevel && (
 					<View style={styles.summaryItem}>
 						<Ionicons
 							name="school-outline"
 							size={22}
-							color={authColors.primaryButton}
+							color={customColors.primaryButton}
 							style={styles.summaryIcon}
 						/>
 						<Text
-							style={[styles.summaryText, { color: authColors.secondaryText }]}
+							style={[
+								styles.summaryText,
+								{ color: customColors.secondaryText },
+							]}
 						>
 							Education:{" "}
-							<Text style={{ fontWeight: "600" }}>
+							<Text
+								style={{ fontWeight: "600", color: customColors.primaryText }}
+							>
 								{EDUCATION_LEVELS.find((e) => e.id === educationLevel)?.label}
 							</Text>
 						</Text>
 					</View>
 				)}
-
 				{selectedRegion && (
 					<View style={styles.summaryItem}>
 						<Ionicons
 							name="location-outline"
 							size={22}
-							color={authColors.primaryButton}
+							color={customColors.primaryButton}
 							style={styles.summaryIcon}
 						/>
 						<Text
-							style={[styles.summaryText, { color: authColors.secondaryText }]}
+							style={[
+								styles.summaryText,
+								{ color: customColors.secondaryText },
+							]}
 						>
 							Target region:{" "}
-							<Text style={{ fontWeight: "600" }}>
+							<Text
+								style={{ fontWeight: "600", color: customColors.primaryText }}
+							>
 								{REGIONS.find((r) => r.id === selectedRegion)?.label}
 							</Text>
 						</Text>
 					</View>
 				)}
 			</View>
-
 			<TouchableOpacity
 				style={[
 					styles.finishButton,
-					{ backgroundColor: authColors.primaryButton },
+					{ backgroundColor: customColors.primaryButton },
 				]}
-				onPress={() => navigation.navigate("Main")}
+				onPress={saveStudentData}
 			>
 				<Text style={styles.finishButtonText}>Let's Go!</Text>
 				<Ionicons
@@ -853,8 +962,6 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 		</View>
 	);
 
-	// ===== IMPORTANT CHANGES BEGIN =====
-	// Map of phase indexes to render functions
 	const phaseRenderers: { [key: number]: () => JSX.Element } = {
 		0: renderWelcome,
 		1: renderMotherTongue,
@@ -866,121 +973,78 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 		7: renderFinalPhase,
 	};
 
-	// ===== IMPORTANT CHANGES: RENDER CURRENT SCREEN =====
-	// Instead of rendering based on phases array, render the current screen directly
-	const renderCurrentScreen = () => {
-		// Get the render function for the current screen
-		const renderFunction = phaseRenderers[currentScreen as number];
-		return renderFunction ? renderFunction() : null;
-	};
+	const renderCurrentScreen = () => phaseRenderers[currentScreen as number]?.();
 
-	const isFirstPhase = currentPhaseIndex === 0;
 	const isLastPhase = currentPhaseIndex === activePhases.length - 1;
+	const isFirstPhase = currentPhaseIndex === 0;
 
 	return (
-		<SafeAreaView style={{ flex: 1 }}>
+		<SafeAreaView style={{ flex: 1, backgroundColor: customColors.background }}>
 			<LinearGradient
-				colors={[authColors.gradientStart, authColors.gradientEnd]}
+				colors={[
+					customColors.gradientStart,
+					customColors.gradientMiddle,
+					customColors.gradientEnd,
+				]}
 				style={styles.container}
 				start={{ x: 0, y: 0 }}
-				end={{ x: 1, y: 1 }}
+				end={{ x: 0, y: 1 }}
 			>
 				<StatusBar
 					barStyle="light-content"
 					backgroundColor="transparent"
 					translucent
 				/>
-
-				{/* Top Navigation Bar */}
 				<View style={styles.topBar}>
-					{!isFirstPhase ? (
-						<TouchableOpacity
-							style={styles.topBarButton}
-							onPress={handlePrevious}
-						>
-							<Ionicons
-								name="arrow-back"
-								size={24}
-								color={authColors.primaryText}
-							/>
-						</TouchableOpacity>
-					) : (
-						<View style={styles.topBarButton} />
-					)}
-
-					<View style={styles.progressContainer}>
-						{activePhases.map((phase, index) => (
-							<TouchableOpacity
-								key={phase}
-								style={[
-									styles.progressDot,
-									{
-										width: index === currentPhaseIndex ? 20 : 10,
-										backgroundColor:
-											index === currentPhaseIndex
-												? authColors.primaryButton
-												: index < currentPhaseIndex
-												? `${authColors.primaryButton}80`
-												: authColors.divider,
-									},
-								]}
-								onPress={() => {
-									// Only allow going back to completed phases
-									if (index <= currentPhaseIndex) {
-										setCurrentPhaseIndex(index);
-									}
-								}}
-							/>
-						))}
+					<View style={styles.progressBar}>
+						<View
+							style={[
+								styles.progressIndicator,
+								{
+									width: `${
+										(currentPhaseIndex / (activePhases.length - 1)) * 100
+									}%`,
+									backgroundColor: "#FFFFFF",
+								},
+							]}
+						/>
 					</View>
-
-					<TouchableOpacity style={styles.topBarButton} onPress={handleSkip}>
-						<Text style={[styles.skipText, { color: authColors.primaryText }]}>
-							Skip
-						</Text>
-					</TouchableOpacity>
 				</View>
 
-				{/* Main Content - Just render the current screen */}
-				<View style={{ width, flex: 1 }}>{renderCurrentScreen()}</View>
+				{/* Sticky header with logo and title */}
+				{renderStickyHeader()}
 
-				{/* Bottom Navigation - don't show on final phase */}
+				{/* Fixed content box that's scrollable */}
+				<View style={styles.contentBoxContainer}>
+					<View style={styles.contentBox}>
+						<ScrollView
+							style={styles.contentScroll}
+							showsVerticalScrollIndicator={true}
+							contentContainerStyle={styles.scrollContent}
+						>
+							{renderCurrentScreen()}
+						</ScrollView>
+					</View>
+				</View>
+
 				{!isLastPhase && (
 					<View style={styles.bottomBar}>
-						<TouchableOpacity
-							style={[
-								styles.navButton,
-								styles.prevButton,
-								{ opacity: !isFirstPhase ? 1 : 0.5 },
-							]}
-							onPress={handlePrevious}
-							disabled={isFirstPhase}
-						>
-							<Ionicons
-								name="arrow-back"
-								size={24}
-								color={authColors.primaryText}
-							/>
-							<Text
-								style={[
-									styles.navButtonText,
-									{ color: authColors.primaryText },
-								]}
+						{!isFirstPhase && (
+							<TouchableOpacity
+								style={styles.backButton}
+								onPress={handlePrevious}
 							>
-								Previous
-							</Text>
-						</TouchableOpacity>
-
+								<Ionicons name="arrow-back" size={24} color="white" />
+							</TouchableOpacity>
+						)}
 						<TouchableOpacity
 							style={[
-								styles.navButton,
-								styles.nextButton,
-								{ backgroundColor: authColors.primaryButton },
+								styles.continueButton,
+								isFirstPhase ? { width: "80%" } : { width: "65%" },
 							]}
 							onPress={handleNext}
 						>
-							<Text style={styles.nextButtonText}>Next</Text>
-							<Ionicons name="arrow-forward" size={24} color="#FFFFFF" />
+							<Text style={styles.continueButtonText}>Continue</Text>
 						</TouchableOpacity>
 					</View>
 				)}
@@ -994,90 +1058,118 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	topBar: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
 		paddingHorizontal: 16,
-		paddingTop: 50,
-		paddingBottom: 16,
+		marginTop: 50,
+		paddingBottom: 10,
+		backgroundColor: "rgba(31, 27, 60, 0.7)",
+		position: "absolute",
+		top: 0,
+		left: 0,
+		right: 0,
+		zIndex: 10,
 	},
-	topBarButton: {
-		padding: 8,
-		minWidth: 60,
+	progressBar: {
+		height: 6,
+		backgroundColor: "rgba(255, 255, 255, 0.2)",
+		borderRadius: 4,
 	},
-	progressContainer: {
-		flexDirection: "row",
+	progressIndicator: {
+		height: 6,
+		borderRadius: 4,
+	},
+	stickyHeader: {
+		position: "absolute",
+		top: 70,
+		left: 0,
+		right: 0,
+		zIndex: 20,
+		// backgroundColor: "rgba(31, 27, 60, 0.9)",
+		paddingHorizontal: 20,
+		paddingVertical: 15,
+		alignItems: "center",
+	},
+	contentBoxContainer: {
+		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
+		paddingTop: 300, // Space for sticky header
+		paddingBottom: 120, // Space for bottom buttons
 	},
-	progressDot: {
-		height: 10,
-		borderRadius: 5,
-		marginHorizontal: 3,
+	contentBox: {
+		// alignItems:"center",
+
+		width: width * 0.9,
+		height: "100%",
+		backgroundColor: "rgba(255, 255, 255, 0.1)",
+		borderRadius: 16,
+		borderWidth: 1,
+		borderColor: "rgba(255, 255, 255, 0.2)",
+		overflow: "hidden",
 	},
-	skipText: {
-		fontSize: 16,
-		fontWeight: "500",
-		textAlign: "right",
+	contentScroll: {
+		flex: 1,
+	},
+	scrollContent: {
+		padding: 16,
 	},
 	phaseContainer: {
-		width,
-		paddingHorizontal: 24,
-		paddingTop: 20,
-		paddingBottom: 100,
+		paddingBottom: 20,
 	},
 	bottomBar: {
 		position: "absolute",
 		bottom: 0,
 		left: 0,
 		right: 0,
-		flexDirection: "row",
-		justifyContent: "space-between",
 		padding: 16,
 		paddingBottom: 32,
-	},
-	navButton: {
 		flexDirection: "row",
+		justifyContent: "center",
 		alignItems: "center",
-		padding: 12,
-		borderRadius: 12,
+		// backgroundColor: "rgba(31, 27, 60, 0.7)",
 	},
-	prevButton: {
-		backgroundColor: "transparent",
+	continueButton: {
+		height: 56,
+		borderWidth: 1,
+		borderColor: "white",
+		borderRadius: 28,
+		justifyContent: "center",
+		alignItems: "center",
 	},
-	nextButton: {
-		paddingHorizontal: 24,
+	backButton: {
+		width: 56,
+		height: 56,
+		borderWidth: 1,
+		borderColor: "white",
+		borderRadius: 28,
+		justifyContent: "center",
+		alignItems: "center",
+		marginRight: 10,
 	},
-	navButtonText: {
-		fontSize: 16,
-		fontWeight: "500",
-		marginLeft: 8,
-	},
-	nextButtonText: {
-		fontSize: 16,
-		fontWeight: "600",
+	continueButtonText: {
 		color: "#FFFFFF",
-		marginRight: 8,
+		fontSize: 18,
+		fontWeight: "600",
 	},
-
-	// Welcome Phase Styles
-	welcomeImage: {
-		width: width * 0.5,
-		height: width * 0.3,
-		alignSelf: "center",
-		marginBottom: 30,
+	mascotContainer: {
+		alignItems: "center",
+		marginBottom: 16,
+	},
+	mascotImage: {
+		width: 100,
+		height: 100,
 	},
 	welcomeTitle: {
 		fontSize: 28,
 		fontWeight: "bold",
 		textAlign: "center",
-		marginBottom: 16,
+		marginBottom: 12,
 	},
 	welcomeSubtitle: {
 		fontSize: 16,
 		textAlign: "center",
 		lineHeight: 24,
-		marginBottom: 32,
+		marginBottom: 24,
+		paddingHorizontal: 20,
 	},
 	featuresContainer: {
 		marginTop: 20,
@@ -1107,17 +1199,24 @@ const styles = StyleSheet.create({
 		fontSize: 14,
 		lineHeight: 20,
 	},
-
-	// Mother Tongue Phase Styles
+	modernCard: {
+		backgroundColor: "rgba(255, 255, 255, 0.15)",
+		borderRadius: 16,
+		padding: 16,
+		marginBottom: 12,
+		borderWidth: 1,
+		borderColor: "rgba(255, 255, 255, 0.2)",
+	},
 	phaseTitle: {
 		fontSize: 24,
 		fontWeight: "bold",
-		marginBottom: 12,
+		marginBottom: 8,
 	},
 	phaseSubtitle: {
 		fontSize: 16,
 		lineHeight: 24,
-		marginBottom: 24,
+		marginBottom: 16,
+		paddingHorizontal: 20,
 	},
 	searchContainer: {
 		marginBottom: 16,
@@ -1141,34 +1240,61 @@ const styles = StyleSheet.create({
 	clearIcon: {
 		marginLeft: 8,
 	},
-	languageList: {
-		maxHeight: height * 0.5,
+	languageListContainer: {
+		flex: 1,
+	},
+	languageListContent: {
+		paddingBottom: 20,
 	},
 	languageItem: {
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		paddingVertical: 12,
+		paddingVertical: 14,
 		paddingHorizontal: 16,
-		borderWidth: 1.5,
-		borderColor: "transparent",
-		borderRadius: 12,
-		marginBottom: 8,
 	},
 	languageText: {
 		fontSize: 16,
+		flex: 1,
 	},
-
-	// English Level Phase Styles
 	levelList: {
 		marginTop: 8,
 	},
-	levelItem: {
+	englishLevelCard: {
+		flexDirection: "row",
+		backgroundColor: "rgba(255, 255, 255, 0.15)",
+		borderRadius: 16,
 		padding: 16,
-		borderWidth: 1.5,
-		borderColor: "transparent",
-		borderRadius: 12,
 		marginBottom: 12,
+		borderWidth: 1,
+		borderColor: "rgba(255, 255, 255, 0.2)",
+		alignItems: "center",
+	},
+	levelIconContainer: {
+		width: 50,
+		height: 50,
+		borderRadius: 25,
+		backgroundColor: "rgba(255, 255, 255, 0.2)",
+		justifyContent: "center",
+		alignItems: "center",
+		marginRight: 16,
+	},
+	levelTextContainer: {
+		flex: 1,
+	},
+	levelLabelRow: {
+		flexDirection: "row",
+		alignItems: "center",
+		marginBottom: 6,
+	},
+	levelTitle: {
+		fontSize: 18,
+		fontWeight: "600",
+		marginRight: 8,
+	},
+	cefrLevel: {
+		fontSize: 16,
+		color: "#AAAACC",
 	},
 	levelHeader: {
 		flexDirection: "row",
@@ -1176,27 +1302,12 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		marginBottom: 4,
 	},
-	levelTitle: {
-		fontSize: 18,
-		fontWeight: "600",
-	},
 	levelDesc: {
 		fontSize: 14,
 		lineHeight: 20,
 	},
-
-	// Goals Phase Styles
 	goalsList: {
 		marginTop: 8,
-	},
-	goalItem: {
-		flexDirection: "row",
-		alignItems: "center",
-		padding: 16,
-		borderWidth: 1.5,
-		borderColor: "transparent",
-		borderRadius: 12,
-		marginBottom: 12,
 	},
 	goalIcon: {
 		width: 42,
@@ -1214,26 +1325,8 @@ const styles = StyleSheet.create({
 	goalCheck: {
 		marginLeft: 8,
 	},
-
-	// Education Level Styles (conditional phase)
-	// Already covered by levelList, levelItem, etc.
-
-	// Reviews Styles (conditional phase)
 	reviewsList: {
 		maxHeight: height * 0.6,
-	},
-	reviewCard: {
-		padding: 16,
-		borderRadius: 12,
-		marginBottom: 16,
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 2,
 	},
 	reviewHeader: {
 		flexDirection: "row",
@@ -1269,19 +1362,8 @@ const styles = StyleSheet.create({
 		lineHeight: 22,
 		fontStyle: "italic",
 	},
-
-	// Region Selection Styles (conditional phase)
 	regionsList: {
 		marginTop: 8,
-	},
-	regionItem: {
-		flexDirection: "row",
-		alignItems: "center",
-		padding: 16,
-		borderWidth: 1.5,
-		borderColor: "transparent",
-		borderRadius: 12,
-		marginBottom: 12,
 	},
 	regionFlag: {
 		fontSize: 24,
@@ -1291,14 +1373,6 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: "500",
 		flex: 1,
-	},
-
-	// Final Phase Styles
-	finalImage: {
-		width: width * 0.5,
-		height: width * 0.3,
-		alignSelf: "center",
-		marginBottom: 30,
 	},
 	finalTitle: {
 		fontSize: 28,
@@ -1314,8 +1388,7 @@ const styles = StyleSheet.create({
 	},
 	summaryContainer: {
 		padding: 16,
-		borderRadius: 12,
-		backgroundColor: "rgba(0,0,0,0.05)",
+		borderRadius: 16,
 		marginBottom: 24,
 	},
 	summaryTitle: {
@@ -1338,16 +1411,14 @@ const styles = StyleSheet.create({
 	finishButton: {
 		flexDirection: "row",
 		height: 56,
-		borderRadius: 16,
+		borderRadius: 28,
 		justifyContent: "center",
 		alignItems: "center",
 		marginTop: 24,
+		paddingHorizontal: 32,
 		elevation: 3,
 		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
+		shadowOffset: { width: 0, height: 2 },
 		shadowOpacity: 0.1,
 		shadowRadius: 4,
 	},

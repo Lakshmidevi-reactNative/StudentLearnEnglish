@@ -2,7 +2,13 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
+import {
+	StyleSheet,
+	View,
+	Text,
+	TouchableOpacity,
+	ActivityIndicator,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { Toaster } from "sonner-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -19,6 +25,7 @@ import ResourceDetailScreen from "./MainScreeens/ResourceDetailScreen";
 import ResourcesScreen from "./MainScreeens/ResourcesScreen";
 import ProfileScreen from "./MainScreeens/ProfileScreen";
 import { ThemeProvider } from "./MainScreeens/constants/ThemeContext";
+import { AuthProvider, useAuth } from "./MainScreeens/AuthScreens/AuthContext"; // Import AuthProvider
 import RoleplayAttemptScreen from "./MainScreeens/assignments/RoleplayAttemptScreen";
 import LanguageAttemptScreen from "./MainScreeens/assignments/LanguageAttemptScreen";
 import TypingPracticeScreen from "./MainScreeens/assignments/TypingPracticeScreen";
@@ -85,11 +92,10 @@ import TypingResult from "./MainScreeens/ResultPages/TypingResult";
 function AuthStackNavigator() {
 	return (
 		<AuthStack.Navigator
-			initialRouteName="Splash"
+			initialRouteName="Welcome"
 			screenOptions={{ headerShown: false }}
 		>
 			<AuthStack.Screen name="Splash" component={SplashScreen} />
-
 			<AuthStack.Screen name="Welcome" component={WelcomeScreen} />
 			<AuthStack.Screen name="Login" component={LoginScreen} />
 			<AuthStack.Screen name="Signup" component={SignupScreen} />
@@ -132,10 +138,17 @@ function TabNavigator() {
 // Main drawer navigator
 function DrawerNavigator() {
 	const { colors } = useTheme();
+	const { studentInfo, logout } = useAuth(); // Get student info and logout function from auth context
 
 	return (
 		<Drawer.Navigator
-			drawerContent={(props) => <CustomDrawerContent {...props} />}
+			drawerContent={(props) => (
+				<CustomDrawerContent
+					{...props}
+					studentInfo={studentInfo}
+					onLogout={logout}
+				/>
+			)}
 			screenOptions={{
 				headerShown: false,
 				drawerActiveTintColor: colors.neonBlue,
@@ -204,34 +217,74 @@ function RootStack() {
 			<Stack.Screen name="LanguageAttempt" component={LanguageAttemptScreen} />
 			<Stack.Screen name="TypingPractice" component={TypingPracticeScreen} />
 			<Stack.Screen name="LanguageResult" component={LanguageResult} />
-<Stack.Screen name="RoleplayResult" component={RoleplayResult} />
-<Stack.Screen name="TypingResult" component={TypingResult} />
+			<Stack.Screen name="RoleplayResult" component={RoleplayResult} />
+			<Stack.Screen name="TypingResult" component={TypingResult} />
 		</Stack.Navigator>
 	);
 }
 
-export default function App() {
-	// You can add state management here to check if the user is authenticated
-	// For example: const [isAuthenticated, setIsAuthenticated] = useState(false);
+// Loading screen component for when checking authentication state
+function LoadingScreen() {
+	const { colors } = useTheme();
 
+	return (
+		<LinearGradient
+			colors={[colors.deepBlue, colors.softPurple]}
+			style={styles.container}
+			start={{ x: 0, y: 0 }}
+			end={{ x: 1, y: 1 }}
+		>
+			<View style={styles.center}>
+				<ActivityIndicator size="large" color={colors.neonBlue} />
+				<Text
+					style={[
+						styles.subtitle,
+						{ color: colors.textSecondary, marginTop: 20 },
+					]}
+				>
+					Loading...
+				</Text>
+			</View>
+		</LinearGradient>
+	);
+}
+
+// Navigation container with authentication state
+function AppNavigator() {
+	const { isLoading, isAuthenticated } = useAuth();
+
+	// Show loading screen while checking authentication state
+	if (isLoading) {
+		return <LoadingScreen />;
+	}
+
+	return (
+		<NavigationContainer>
+			<Stack.Navigator screenOptions={{ headerShown: false }}>
+				{isAuthenticated ? (
+					// User is signed in
+					<Stack.Screen name="Root" component={RootStack} />
+				) : (
+					// User is not signed in
+					<Stack.Screen name="Auth" component={AuthStackNavigator} />
+				)}
+			</Stack.Navigator>
+		</NavigationContainer>
+	);
+}
+
+export default function App() {
 	return (
 		<GestureHandlerRootView style={styles.container}>
 			<ThemeProvider>
-				<SafeAreaProvider style={styles.container}>
-					<Toaster />
-					<NavigationContainer>
-						<Stack.Navigator
-							initialRouteName="Auth"
-							screenOptions={{ headerShown: false }}
-						>
-							{/* Auth Flow with Welcome as the first screen */}
-							<Stack.Screen name="Auth" component={AuthStackNavigator} />
-
-							{/* Main App Flow */}
-							<Stack.Screen name="Main" component={RootStack} />
-						</Stack.Navigator>
-					</NavigationContainer>
-				</SafeAreaProvider>
+				<AuthProvider>
+					{" "}
+					{/* Wrap with AuthProvider */}
+					<SafeAreaProvider style={styles.container}>
+						<Toaster />
+						<AppNavigator />
+					</SafeAreaProvider>
+				</AuthProvider>
 			</ThemeProvider>
 		</GestureHandlerRootView>
 	);

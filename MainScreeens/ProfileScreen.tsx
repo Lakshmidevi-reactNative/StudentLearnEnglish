@@ -24,16 +24,20 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { COLORS } from "./constants/Colors";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { toast } from "sonner-native";
+import { useAuth } from "./AuthScreens/AuthContext"; // Import useAuth hook
 
 export default function ProfileScreen() {
 	const navigation = useNavigation();
+	const { studentInfo, logout } = useAuth(); // Use the auth hook
+
 	const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 	const [isPhotoPickerVisible, setIsPhotoPickerVisible] = useState(false);
 	const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 	const [isJoinClassModalVisible, setIsJoinClassModalVisible] = useState(false);
 	const [isDarkMode, setIsDarkMode] = useState(true);
 	const [profilePhoto, setProfilePhoto] = useState(
-		"https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20female%20student%20with%20a%20friendly%20smile&aspect=1:1&seed=123"
+		studentInfo?.student_photo ||
+			"https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20student%20with%20a%20friendly%20smile&aspect=1:1&seed=123"
 	);
 	const [classCode, setClassCode] = useState("");
 	const [isValidCode, setIsValidCode] = useState(true);
@@ -41,18 +45,34 @@ export default function ProfileScreen() {
 	const [cameraActive, setCameraActive] = useState(false);
 	const [permission, requestPermission] = useCameraPermissions();
 
-	// User data (mock)
+	// User data from auth context
 	const [userData, setUserData] = useState({
-		name: "Sarah Johnson",
+		name: studentInfo?.student_name || "Student Name",
 		role: "Student",
-		email: "sarah.johnson@example.com",
-		phone: "+1 (555) 123-4567",
-		education: "Bachelor of Arts in Communications",
+		email: studentInfo?.student_email || "student@example.com",
+		phone: studentInfo?.student_phone || "+1 (555) 123-4567",
+		education: "Student",
 		licenseEndDate: "2025-12-31",
 		notifications: true,
 		emailUpdates: true,
 		soundEffects: true,
 	});
+
+	// Update user data when studentInfo changes
+	useEffect(() => {
+		if (studentInfo) {
+			setUserData({
+				...userData,
+				name: studentInfo.student_name || "Student Name",
+				email: studentInfo.student_email || "student@example.com",
+				phone: studentInfo.student_phone || "",
+			});
+
+			if (studentInfo.student_photo) {
+				setProfilePhoto(studentInfo.student_photo);
+			}
+		}
+	}, [studentInfo]);
 
 	// Mock classes data
 	const [enrolledClasses, setEnrolledClasses] = useState([
@@ -120,7 +140,7 @@ export default function ProfileScreen() {
 		// For this demo, we'll just use a new generated image
 		const newPhotoSeed = Math.floor(Math.random() * 1000);
 		setProfilePhoto(
-			`https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20female%20student%20with%20a%20smile&aspect=1:1&seed=${newPhotoSeed}`
+			`https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20student%20with%20a%20smile&aspect=1:1&seed=${newPhotoSeed}`
 		);
 		setCameraActive(false);
 		setIsPhotoPickerVisible(false);
@@ -132,7 +152,7 @@ export default function ProfileScreen() {
 		// For this demo, we'll just use a new generated image
 		const newPhotoSeed = Math.floor(Math.random() * 1000);
 		setProfilePhoto(
-			`https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20female%20student%20smiling&aspect=1:1&seed=${newPhotoSeed}`
+			`https://api.a0.dev/assets/image?text=portrait%20photo%20of%20a%20young%20student%20smiling&aspect=1:1&seed=${newPhotoSeed}`
 		);
 		setIsPhotoPickerVisible(false);
 		toast.success("Profile photo updated");
@@ -140,6 +160,14 @@ export default function ProfileScreen() {
 
 	const toggleCameraFacing = () => {
 		setFacing((current) => (current === "back" ? "front" : "back"));
+	};
+
+	const handleLogout = () => {
+		// Call the logout function from AuthContext
+		if (logout) {
+			logout();
+			toast.success("Logged out successfully");
+		}
 	};
 
 	return (
@@ -198,16 +226,9 @@ export default function ProfileScreen() {
 								<View style={styles.statDivider} />
 								<View style={styles.statItem}>
 									<Text style={styles.statNumber}>
-										{new Date(userData.licenseEndDate).toLocaleDateString(
-											"en-US",
-											{
-												year: "numeric",
-												month: "short",
-												day: "numeric",
-											}
-										)}
+										{studentInfo?.classroom_id || "N/A"}
 									</Text>
-									<Text style={styles.statLabel}>License End</Text>
+									<Text style={styles.statLabel}>Class ID</Text>
 								</View>
 							</View>
 						</View>
@@ -238,7 +259,9 @@ export default function ProfileScreen() {
 									/>
 									<View style={styles.infoTextContainer}>
 										<Text style={styles.infoLabel}>Phone</Text>
-										<Text style={styles.infoValue}>{userData.phone}</Text>
+										<Text style={styles.infoValue}>
+											{userData.phone || "Not available"}
+										</Text>
 									</View>
 								</View>
 
@@ -249,8 +272,10 @@ export default function ProfileScreen() {
 										color={COLORS.neonGreen}
 									/>
 									<View style={styles.infoTextContainer}>
-										<Text style={styles.infoLabel}>Education</Text>
-										<Text style={styles.infoValue}>{userData.education}</Text>
+										<Text style={styles.infoLabel}>Institute</Text>
+										<Text style={styles.infoValue}>
+											{studentInfo?.institute_name || "Not available"}
+										</Text>
 									</View>
 								</View>
 							</View>
@@ -316,7 +341,10 @@ export default function ProfileScreen() {
 									/>
 								</TouchableOpacity>
 
-								<TouchableOpacity style={styles.settingsRow}>
+								<TouchableOpacity
+									style={styles.settingsRow}
+									onPress={handleLogout}
+								>
 									<View style={styles.settingsIconContainer}>
 										<MaterialCommunityIcons
 											name="logout"
@@ -460,16 +488,6 @@ export default function ProfileScreen() {
 										setUserData({ ...userData, phone: text })
 									}
 									keyboardType="phone-pad"
-									placeholderTextColor={COLORS.textSecondary}
-								/>
-
-								<Text style={styles.inputLabel}>Education</Text>
-								<TextInput
-									style={styles.textInput}
-									value={userData.education}
-									onChangeText={(text) =>
-										setUserData({ ...userData, education: text })
-									}
 									placeholderTextColor={COLORS.textSecondary}
 								/>
 

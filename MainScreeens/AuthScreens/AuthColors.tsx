@@ -13,11 +13,11 @@ export const AUTH_COLORS = {
 	titleText: "#FFFFFF", // White for main titles
 	primaryText: "#FFFFFF", // White for primary text
 	secondaryText: "#A0A7B5", // Light gray for secondary text
-	accentText: COLORS.neonBlue, // Bright blue for accent text
+	accentText: "white", // Bright blue for accent text
 
 	// UI Elements
 	primaryButton: COLORS.neonBlue, // Bright blue for primary buttons
-	outlineButtonBorder: COLORS.neonBlue, // Border for outline buttons
+	outlineButtonBorder: "white", // Border for outline buttons
 	inputBorder: "#384057", // Subtle border for inputs
 	inputBorderFocus: COLORS.neonBlue, // Highlighted border for focused inputs
 

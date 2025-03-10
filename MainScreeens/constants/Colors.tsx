@@ -1,7 +1,7 @@
 export const COLORS = {
 	deepBlue: "#0B1033",
 	softPurple: "#302253",
-	neonBlue: "#00B4FF",
+	neonBlue: "#012269",
 	neonPurple: "#302253",
 	neonGreen: "#39FF14",
 	neonOrange: "#FF6B35",
