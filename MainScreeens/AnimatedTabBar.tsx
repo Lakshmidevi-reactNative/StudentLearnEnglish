@@ -17,7 +17,7 @@ import { useTheme } from "./constants/ThemeContext";
 const { width } = Dimensions.get("window");
 
 // Track which screens need refreshing
-const screensNeedRefresh = {};
+const screensNeedRefresh: { [key: string]: boolean } = {};
 
 interface TabIconProps {
 	routeName: string;
@@ -129,7 +129,7 @@ const AnimatedTabBar = ({
 		if (!isFocused && !event.defaultPrevented) {
 			// Navigate to the selected tab
 			navigation.navigate(route.name);
-			
+
 			// Check if this screen needs a refresh
 			if (screensNeedRefresh[route.name]) {
 				// Reset the tab's navigation state to force a refresh
@@ -152,9 +152,10 @@ const AnimatedTabBar = ({
 	// Safe bottom padding (adds to existing styles)
 	const bottomPadding = Math.max(insets.bottom, 10);
 
-	const gradientColors = theme === 'dark' 
-		? ["rgba(11, 16, 51, 0.95)", "rgba(33, 33, 100, 0.95)"]
-		: ["rgba(255, 255, 255, 0.95)", "rgba(240, 240, 255, 0.95)"];
+	const gradientColors =
+		theme === "dark"
+			? ["rgba(11, 16, 51, 0.95)", "rgba(33, 33, 100, 0.95)"]
+			: ["rgba(255, 255, 255, 0.95)", "rgba(240, 240, 255, 0.95)"];
 
 	return (
 		<>
@@ -209,7 +210,14 @@ const AnimatedTabBar = ({
 								<Text style={[styles.tabLabel, { color }]}>
 									{String(label)}
 								</Text>
-								{isFocused && <View style={[styles.activeIndicator, { backgroundColor: colors.neonBlue }]} />}
+								{isFocused && (
+									<View
+										style={[
+											styles.activeIndicator,
+											{ backgroundColor: colors.neonBlue },
+										]}
+									/>
+								)}
 							</TouchableOpacity>
 						);
 					})}

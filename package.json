@@ -16,6 +16,7 @@
     "@react-navigation/drawer": "^7.1.1",
     "@react-navigation/native": "latest",
     "@react-navigation/native-stack": "latest",
+    "@react-navigation/stack": "^7.1.2",
     "@supabase/supabase-js": "latest",
     "axios": "^1.8.1",
     "expo": "~52.0.36",

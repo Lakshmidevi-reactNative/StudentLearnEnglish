@@ -24,7 +24,7 @@ export default function LearnScreen() {
 		{
 			icon: "headset",
 			title: "ListenEng",
-			color: COLORS.neonBlue,
+			color: "white",
 			description: "Improve your listening skills with audio lessons",
 			progress: 85,
 			route: "Contents", // Changed to navigate to Contents screen
@@ -33,7 +33,7 @@ export default function LearnScreen() {
 		{
 			icon: "microphone",
 			title: "SpeakEng",
-			color: COLORS.neonPurple,
+			color: "red",
 			description: "Practice pronunciation and conversation",
 			progress: 70,
 			route: "SpeakEng", // Keeps navigating to SpeakEng directly

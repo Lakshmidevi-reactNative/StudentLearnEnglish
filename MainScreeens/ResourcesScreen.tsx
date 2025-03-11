@@ -32,8 +32,8 @@ export default function ResourcesScreen() {
 	const [activeCategory, setActiveCategory] = useState("all");
 	const [searchQuery, setSearchQuery] = useState("");
 
-	// Header animation values
-	const headerHeight = 180;
+	// Header animation values - Adjusted for smoother transition
+	const headerHeight = 80; // Reduced from 100
 	const headerScale = scrollY.interpolate({
 		inputRange: [0, headerHeight],
 		outputRange: [1, 0.85],
@@ -42,7 +42,7 @@ export default function ResourcesScreen() {
 
 	const headerTranslateY = scrollY.interpolate({
 		inputRange: [0, headerHeight],
-		outputRange: [0, -50],
+		outputRange: [0, -40], // Reduced from -50
 		extrapolate: "clamp",
 	});
 
@@ -52,8 +52,9 @@ export default function ResourcesScreen() {
 		extrapolate: "clamp",
 	});
 
+	// Adjusted sticky header to appear more quickly and smoothly
 	const stickyHeaderOpacity = scrollY.interpolate({
-		inputRange: [headerHeight - 20, headerHeight],
+		inputRange: [headerHeight - 30, headerHeight - 10], // Adjusted for quicker transition
 		outputRange: [0, 1],
 		extrapolate: "clamp",
 	});
@@ -332,13 +333,12 @@ export default function ResourcesScreen() {
 				backgroundColor="transparent"
 			/>
 
-			{/* Sticky header that appears when scrolling */}
+			{/* Sticky header that appears when scrolling - Optimized size */}
 			<Animated.View
 				style={[
 					styles.stickyHeader,
 					{
 						opacity: stickyHeaderOpacity,
-						paddingTop: Platform.OS === "ios" ? 50 : 40,
 					},
 				]}
 			>
@@ -524,25 +524,25 @@ const styles = StyleSheet.create({
 	},
 	header: {
 		paddingHorizontal: 20,
-		paddingTop: Platform.OS === "ios" ? 10 : 40,
-		paddingBottom: 20,
+		paddingTop: Platform.OS === "ios" ? 5 : 5, // Reduced from 10
+		paddingBottom: 15, // Reduced from 20
 	},
 	headerTextContainer: {
-		marginBottom: 15,
+		marginBottom: 10, // Reduced from 15
 	},
 	headerTitle: {
 		color: COLORS.textPrimary,
-		fontSize: 28,
+		fontSize: 26, // Reduced from 28
 		fontWeight: "700",
-		marginBottom: 8,
+		marginBottom: 4, // Reduced from 8
 		textShadowColor: COLORS.neonBlue,
 		textShadowOffset: { width: 0, height: 0 },
 		textShadowRadius: 10,
 	},
 	headerSubtitle: {
 		color: COLORS.textSecondary,
-		fontSize: 16,
-		lineHeight: 22,
+		fontSize: 14, // Reduced from 16
+		lineHeight: 20, // Reduced from 22
 		maxWidth: "90%",
 	},
 	searchContainer: {
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
 		backgroundColor: "rgba(255, 255, 255, 0.08)",
 		borderRadius: 12,
 		paddingHorizontal: 15,
-		paddingVertical: 12,
+		paddingVertical: 10, // Reduced from 12
 		marginTop: 5,
 	},
 	searchIcon: {
@@ -576,33 +576,33 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 		alignItems: "center",
 		paddingHorizontal: 20,
-		paddingBottom: 15,
-		paddingTop: Platform.OS === "ios" ? 10 : 15,
+		paddingBottom: 10, // Reduced from 15
+		paddingTop: Platform.OS === "ios" ? 45 : 35, // Adjusted for status bar height
 	},
 	stickyHeaderTitle: {
 		color: COLORS.textPrimary,
-		fontSize: 20,
+		fontSize: 18, // Reduced from 20
 		fontWeight: "700",
 		textShadowColor: COLORS.neonBlue,
 		textShadowOffset: { width: 0, height: 0 },
 		textShadowRadius: 10,
 	},
 	stickySearchButton: {
-		width: 40,
-		height: 40,
-		borderRadius: 20,
+		width: 36, // Reduced from 40
+		height: 36, // Reduced from 40
+		borderRadius: 18,
 		backgroundColor: "rgba(255, 255, 255, 0.1)",
 		justifyContent: "center",
 		alignItems: "center",
 	},
 	scrollContent: {
-		paddingTop: 20,
+		paddingTop: 15, // Reduced from 20
 	},
 	featuredCard: {
 		marginHorizontal: 20,
 		borderRadius: 16,
 		overflow: "hidden",
-		marginBottom: 24,
+		marginBottom: 20, // Reduced from 24
 		elevation: 5,
 		shadowColor: COLORS.neonBlue,
 		shadowOffset: { width: 0, height: 4 },
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 		alignItems: "center",
 		paddingHorizontal: 20,
-		marginBottom: 12,
+		marginBottom: 10, // Reduced from 12
 	},
 	sectionTitle: {
 		color: COLORS.textPrimary,
@@ -675,7 +675,7 @@ const styles = StyleSheet.create({
 		fontWeight: "600",
 	},
 	categoriesContainer: {
-		marginBottom: 24,
+		marginBottom: 20, // Reduced from 24
 	},
 	categoriesContent: {
 		paddingHorizontal: 15,
