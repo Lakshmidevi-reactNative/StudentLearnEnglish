@@ -243,7 +243,7 @@ export default function ProfileScreen() {
 									<MaterialCommunityIcons
 										name="email-outline"
 										size={22}
-										color={COLORS.neonBlue}
+										color={COLORS.textPrimary}
 									/>
 									<View style={styles.infoTextContainer}>
 										<Text style={styles.infoLabel}>Email</Text>
@@ -255,7 +255,7 @@ export default function ProfileScreen() {
 									<MaterialCommunityIcons
 										name="phone-outline"
 										size={22}
-										color={COLORS.neonPurple}
+										color={COLORS.textPrimary}
 									/>
 									<View style={styles.infoTextContainer}>
 										<Text style={styles.infoLabel}>Phone</Text>
@@ -269,7 +269,7 @@ export default function ProfileScreen() {
 									<MaterialCommunityIcons
 										name="school-outline"
 										size={22}
-										color={COLORS.neonGreen}
+										color={COLORS.textPrimary}
 									/>
 									<View style={styles.infoTextContainer}>
 										<Text style={styles.infoLabel}>Institute</Text>
@@ -311,14 +311,14 @@ export default function ProfileScreen() {
 										<MaterialCommunityIcons
 											name="credit-card-outline"
 											size={22}
-											color={COLORS.neonPurple}
+											color={COLORS.textPrimary}
 										/>
 									</View>
 									<Text style={styles.settingsText}>Payment Methods</Text>
 									<MaterialCommunityIcons
 										name="chevron-right"
 										size={22}
-										color={COLORS.textSecondary}
+										color={COLORS.textPrimary}
 									/>
 								</TouchableOpacity>
 
@@ -330,14 +330,14 @@ export default function ProfileScreen() {
 										<MaterialCommunityIcons
 											name="cog-outline"
 											size={22}
-											color={COLORS.neonGreen}
+											color={COLORS.textPrimary}
 										/>
 									</View>
 									<Text style={styles.settingsText}>Settings</Text>
 									<MaterialCommunityIcons
 										name="chevron-right"
 										size={22}
-										color={COLORS.textSecondary}
+										color={COLORS.textPrimary}
 									/>
 								</TouchableOpacity>
 
@@ -349,7 +349,7 @@ export default function ProfileScreen() {
 										<MaterialCommunityIcons
 											name="logout"
 											size={22}
-											color={COLORS.neonOrange}
+											color={COLORS.textPrimary}
 										/>
 									</View>
 									<Text style={styles.settingsText}>Logout</Text>
@@ -841,7 +841,7 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 		alignItems: "center",
 		paddingHorizontal: 20,
-		paddingTop: Platform.OS === "ios" ? 10 : 40,
+		paddingTop: Platform.OS === "ios" ? 10 : 20,
 		paddingBottom: 15,
 	},
 	backButton: {
@@ -915,7 +915,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 	},
 	statNumber: {
-		color: COLORS.neonBlue,
+		color:COLORS.textPrimary,
 		fontSize: 18,
 		fontWeight: "700",
 		marginBottom: 5,

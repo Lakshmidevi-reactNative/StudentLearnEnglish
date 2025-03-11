@@ -245,52 +245,7 @@ export default function HomeScreen() {
 								start={{ x: 0, y: 0 }}
 								end={{ x: 1, y: 1 }}
 							>
-								<View style={styles.featuredContent}>
-									<View style={styles.featuredTextContainer}>
-										<Text
-											style={[
-												styles.featuredTitle,
-												{ color: colors.textPrimary },
-											]}
-										>
-											Daily Challenge
-										</Text>
-										<Text
-											style={[
-												styles.featuredSubtitle,
-												{ color: colors.textSecondary },
-											]}
-										>
-											Complete today's learning goal and earn bonus points
-										</Text>
-										<TouchableOpacity
-											style={[
-												styles.featuredButton,
-												{
-													backgroundColor: colors.neonBlue,
-													shadowColor: colors.neonBlue,
-												},
-											]}
-										>
-											<Text
-												style={[
-													styles.featuredButtonText,
-													{ color: theme === "dark" ? "#FFFFFF" : "#FFFFFF" },
-												]}
-											>
-												Start Now
-											</Text>
-										</TouchableOpacity>
-									</View>
-									<View style={styles.featuredImageContainer}>
-										<Image
-											source={{
-												uri: "https://api.a0.dev/assets/image?text=glowing%20holographic%20english%20language%20learning%20icon&aspect=1:1&seed=456",
-											}}
-											style={styles.featuredImage}
-										/>
-									</View>
-								</View>
+								
 							</LinearGradient>
 						</View>
 					</Animated.View>
@@ -508,7 +463,7 @@ const styles = StyleSheet.create({
 		justifyContent: "space-between",
 		alignItems: "center",
 		paddingHorizontal: 20,
-		paddingTop: Platform.OS === "ios" ? 10 : 40,
+		paddingTop: Platform.OS === "ios" ? 10 : 20,
 		paddingBottom: 15,
 	},
 	menuButton: {
@@ -532,7 +487,7 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		marginBottom: 10,
+		marginVertical: 20,
 	},
 	greeting: {
 		fontSize: 16,
