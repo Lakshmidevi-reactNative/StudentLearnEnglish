@@ -12,6 +12,7 @@ import {
 import {
 	DrawerContentScrollView,
 	DrawerItemList,
+	DrawerItem,
 } from "@react-navigation/drawer";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -56,7 +57,6 @@ export default function CustomDrawerContent(props: CustomDrawerContentProps) {
 	return (
 		<LinearGradient
 			colors={[colors.deepBlue, colors.softPurple]}
-			// colors={["#0f2027", "#203a439", "#2d2d86"]}
 			style={styles.container}
 			start={{ x: 0, y: 0 }}
 			end={{ x: 1, y: 1 }}
@@ -95,7 +95,12 @@ export default function CustomDrawerContent(props: CustomDrawerContentProps) {
 							},
 						]}
 					>
-						<Text style={[styles.levelText, { color: colors.neonBlue }]}>
+						<Text
+							style={[
+								styles.levelText,
+								{ color: theme === "dark" ? "#FFFFFF" : colors.deepBlue },
+							]}
+						>
 							Beginner
 						</Text>
 					</View>
@@ -108,7 +113,72 @@ export default function CustomDrawerContent(props: CustomDrawerContentProps) {
 					]}
 				/>
 
-				<DrawerItemList {...props} />
+				{/* Custom DrawerItemList with white text for selected items */}
+				<View style={styles.drawerItemsContainer}>
+					{props.state.routes.map((route, index) => {
+						const { options } = props.descriptors[route.key];
+						const label =
+							options.drawerLabel !== undefined
+								? options.drawerLabel
+								: options.title !== undefined
+								? options.title
+								: route.name;
+
+						const isFocused = props.state.index === index;
+
+						return (
+							<DrawerItem
+								key={route.key}
+								label={({ focused, color }) => (
+									<Text
+										style={{
+											color: isFocused
+												? theme === "dark"
+													? "#FFFFFF"
+													: "#4169E1" // Royal blue for light mode
+												: colors.textPrimary,
+											fontWeight: isFocused ? "bold" : "normal",
+										}}
+									>
+										{label}
+									</Text>
+								)}
+								onPress={() => {
+									props.navigation.navigate(route.name);
+								}}
+								focused={isFocused}
+								activeTintColor="#FFFFFF"
+								activeBackgroundColor={
+									theme === "dark"
+										? "rgba(255, 255, 255, 0.2)"
+										: "rgba(65, 105, 225, 0.1)" // Light blue background in light mode
+								}
+								style={
+									isFocused && theme === "light"
+										? {
+												backgroundColor: "rgba(65, 105, 225, 0.1)",
+												borderRadius: 10,
+												overflow: "hidden",
+										  }
+										: {}
+								}
+								icon={({ focused, color, size }) => {
+									if (options.drawerIcon) {
+										// In dark mode: white icons
+										// In light mode: black icons
+										const iconColor = theme === "dark" ? "#FFFFFF" : "#000000";
+										return options.drawerIcon({
+											focused,
+											color: iconColor,
+											size: size || 24,
+										});
+									}
+									return null;
+								}}
+							/>
+						);
+					})}
+				</View>
 
 				<View
 					style={[
@@ -181,6 +251,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 5,
 		borderRadius: 20,
 		borderWidth: 1,
+		overflow: "hidden",
 	},
 	levelText: {
 		fontWeight: "600",
@@ -190,6 +261,9 @@ const styles = StyleSheet.create({
 		height: 1,
 		marginVertical: 15,
 		marginHorizontal: 20,
+	},
+	drawerItemsContainer: {
+		marginVertical: 5,
 	},
 	modeToggleContainer: {
 		flexDirection: "row",

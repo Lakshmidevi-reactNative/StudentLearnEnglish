@@ -186,9 +186,9 @@ type OnboardingScreenProps = {
 const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 	const customColors = {
 		background: "#1F1B3C",
-		gradientStart: "#1F1B3C",
+		gradientStart: "#320D3C",
 		gradientMiddle: "#2A2650",
-		gradientEnd: "#333180",
+		gradientEnd: "#136C80",
 		primaryText: "#FFFFFF",
 		secondaryText: "#CCCCFF",
 		primaryButton: "#4A90E2",
@@ -981,11 +981,12 @@ const OnboardingScreen = ({ navigation, route }: OnboardingScreenProps) => {
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: customColors.background }}>
 			<LinearGradient
-				colors={[
-					customColors.gradientStart,
-					customColors.gradientMiddle,
-					customColors.gradientEnd,
-				]}
+				colors={["#320D3C", "#136C80"]}
+				// colors={[
+				// 	customColors.gradientStart,
+				// 	customColors.gradientMiddle,
+				// 	customColors.gradientEnd,
+				// ]}
 				style={styles.container}
 				start={{ x: 0, y: 0 }}
 				end={{ x: 0, y: 1 }}
@@ -1061,7 +1062,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		marginTop: 50,
 		paddingBottom: 10,
-		backgroundColor: "rgba(31, 27, 60, 0.7)",
+		// backgroundColor: "rgba(31, 27, 60, 0.7)",
 		position: "absolute",
 		top: 0,
 		left: 0,
